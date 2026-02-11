@@ -1,0 +1,11 @@
+{
+  "name": "hire-lytics-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "cd APP/frontend && npm install && cd ../backend && pip install -r requirements.txt",
+    "dev:frontend": "cd APP/frontend && npm run dev",
+    "dev:backend": "cd APP/backend && python server.py",
+    "dev": "echo 'Run backend and frontend in separate terminals: npm run dev:backend and npm run dev:frontend'"
+  }
+}
