@@ -100,7 +100,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.8 }}
+                    transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
                     <h2 className="analyzer-title">Start Your Resume Analysis</h2>
                     <p className="analyzer-subtitle">
@@ -113,7 +113,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                     initial={{ opacity: 0, y: 40 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ delay: 0.2, duration: 0.8 }}
+                    transition={{ delay: 0.2, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
                     <AnimatePresence mode="wait">
                         {!isAnalyzing ? (
@@ -123,7 +123,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                             >
                                 <div className="upload-icon">
                                     <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
@@ -162,7 +162,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                transition={{ duration: 0.3 }}
+                                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                             >
                                 {!uploadComplete ? (
                                     <div className="upload-progress">
@@ -184,7 +184,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                 className="progress-bar"
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${progress}%` }}
-                                                transition={{ duration: 0.3 }}
+                                                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                                             ></motion.div>
                                         </div>
                                         <div className="progress-text">{progress}% uploaded</div>
@@ -195,7 +195,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                             className="score-display-large"
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
-                                            transition={{ type: "spring", duration: 0.8 }}
+                                            transition={{ type: "spring", stiffness: 150, damping: 20, duration: 0.6 }}
                                         >
                                             <svg viewBox="0 0 200 200" className="score-svg-large">
                                                 <circle
@@ -217,7 +217,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                     strokeDasharray={565.487}
                                                     initial={{ strokeDashoffset: 565.487 }}
                                                     animate={{ strokeDashoffset: 565.487 * (1 - score / 100) }}
-                                                    transition={{ duration: 2, ease: "easeOut" }}
+                                                    transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
                                                     style={{ transform: 'rotate(-90deg)', transformOrigin: '100px 100px' }}
                                                 />
                                                 <defs>
@@ -238,7 +238,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                 className="breakdown-item"
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.5, duration: 0.5 }}
+                                                transition={{ delay: 0.4, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                                             >
                                                 <div className="breakdown-label">ATS Parse Rate</div>
                                                 <div className="breakdown-bar">
@@ -246,7 +246,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                         className="breakdown-fill success"
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${analysisResults?.breakdown?.ats_parse_rate || 95}%` }}
-                                                        transition={{ delay: 0.7, duration: 1 }}
+                                                        transition={{ delay: 0.6, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
                                                     ></motion.div>
                                                 </div>
                                                 <div className="breakdown-value">{analysisResults?.breakdown?.ats_parse_rate || 95}%</div>
@@ -256,7 +256,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                 className="breakdown-item"
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.7, duration: 0.5 }}
+                                                transition={{ delay: 0.6, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                                             >
                                                 <div className="breakdown-label">Formatting</div>
                                                 <div className="breakdown-bar">
@@ -264,7 +264,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                         className="breakdown-fill success"
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${analysisResults?.breakdown?.formatting || 88}%` }}
-                                                        transition={{ delay: 0.9, duration: 1 }}
+                                                        transition={{ delay: 0.8, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
                                                     ></motion.div>
                                                 </div>
                                                 <div className="breakdown-value">{analysisResults?.breakdown?.formatting || 88}%</div>
@@ -274,7 +274,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                 className="breakdown-item"
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.9, duration: 0.5 }}
+                                                transition={{ delay: 0.8, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                                             >
                                                 <div className="breakdown-label">Skills Match</div>
                                                 <div className="breakdown-bar">
@@ -282,7 +282,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                         className="breakdown-fill warning"
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${analysisResults?.breakdown?.skills_match || 72}%` }}
-                                                        transition={{ delay: 1.1, duration: 1 }}
+                                                        transition={{ delay: 1.0, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
                                                     ></motion.div>
                                                 </div>
                                                 <div className="breakdown-value">{analysisResults?.breakdown?.skills_match || 72}%</div>
@@ -292,7 +292,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                 className="breakdown-item"
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 1.1, duration: 0.5 }}
+                                                transition={{ delay: 1.0, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                                             >
                                                 <div className="breakdown-label">Grammar</div>
                                                 <div className="breakdown-bar">
@@ -300,7 +300,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                                         className="breakdown-fill success"
                                                         initial={{ width: 0 }}
                                                         animate={{ width: `${analysisResults?.breakdown?.grammar || 98}%` }}
-                                                        transition={{ delay: 1.3, duration: 1 }}
+                                                        transition={{ delay: 1.2, duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
                                                     ></motion.div>
                                                 </div>
                                                 <div className="breakdown-value">{analysisResults?.breakdown?.grammar || 98}%</div>
@@ -312,7 +312,7 @@ const ResumeAnalyzer = ({ backendStatus }) => {
                                             onClick={resetAnalyzer}
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: 1.5, duration: 0.5 }}
+                                            transition={{ delay: 1.4, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                                             data-testid="analyze-another-btn"
                                         >
                                             Analyze Another Resume

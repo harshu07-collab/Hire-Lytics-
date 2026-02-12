@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ThemeProvider } from 'next-themes';
 import '@/App.css';
 import GoogleSearchIntro from './components/GoogleSearchIntro';
 import HirelyticApp from './components/HirelyticApp';
@@ -47,13 +48,15 @@ function App() {
     };
 
     return (
-        <div className="App">
-            {showIntro && !hasSeenIntro ? (
-                <GoogleSearchIntro onComplete={handleIntroComplete} />
-            ) : (
-                <HirelyticApp backendStatus={backendStatus} />
-            )}
-        </div>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <div className="App">
+                {showIntro && !hasSeenIntro ? (
+                    <GoogleSearchIntro onComplete={handleIntroComplete} />
+                ) : (
+                    <HirelyticApp backendStatus={backendStatus} />
+                )}
+            </div>
+        </ThemeProvider>
     );
 }
 

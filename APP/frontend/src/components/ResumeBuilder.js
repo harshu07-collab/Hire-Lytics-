@@ -18,7 +18,7 @@ const ResumeBuilder = () => {
                     </h2>
                     <p className="builder-description">
                         After receiving your checker score you can continue editing and improving your
-                        job application with Enhancv's resume builder. Quickly add, reorder, or remove
+                        job application with Hirelytic's resume builder. Quickly add, reorder, or remove
                         sections.
                     </p>
                     <p className="builder-description">
@@ -75,8 +75,26 @@ const ResumeBuilder = () => {
                         <div className="template-selector">
                             <div className="selector-label">Select a template</div>
                             <div className="template-options">
-                                <div className="template-thumb active"></div>
-                                <div className="template-thumb"></div>
+                                <div className="template-thumb active">
+                                    <div className="thumb-preview modern">
+                                        <div className="thumb-header"></div>
+                                        <div className="thumb-content">
+                                            <div className="thumb-line"></div>
+                                            <div className="thumb-line short"></div>
+                                        </div>
+                                    </div>
+                                    <span className="thumb-label">Modern</span>
+                                </div>
+                                <div className="template-thumb">
+                                    <div className="thumb-preview classic">
+                                        <div className="thumb-sidebar"></div>
+                                        <div className="thumb-main">
+                                            <div className="thumb-line"></div>
+                                            <div className="thumb-line short"></div>
+                                        </div>
+                                    </div>
+                                    <span className="thumb-label">Classic</span>
+                                </div>
                             </div>
                         </div>
                     </div>

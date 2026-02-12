@@ -1,6 +1,10 @@
 .resume-sections {
     padding: 120px 24px;
-    background: #ffffff;
+    background: var(--background);
+}
+
+.dark .resume-sections {
+    background: #0f172a;
 }
 
 .sections-container {
@@ -13,11 +17,15 @@
 }
 
 .sections-container.reverse {
-    direction: rtl;
+    direction: ltr;
 }
 
-.sections-container.reverse > * {
-    direction: ltr;
+.sections-container.reverse .sections-visual {
+    order: 1;
+}
+
+.sections-container.reverse .sections-content {
+    order: 2;
 }
 
 .sections-content {
@@ -48,11 +56,19 @@
     letter-spacing: -0.5px;
 }
 
+.dark .sections-title {
+    color: #f8fafc;
+}
+
 .sections-description {
     font-size: 16px;
     line-height: 1.8;
     color: #6b7280;
     margin: 0 0 20px 0;
+}
+
+.dark .sections-description {
+    color: #94a3b8;
 }
 
 .sections-visual {
@@ -69,6 +85,11 @@
     border-radius: 24px;
     padding: 24px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.dark .mock-device {
+    background: #1e293b;
+    border-color: #334155;
 }
 
 .device-screen {
@@ -90,7 +111,24 @@
     height: 80px;
     border-radius: 12px;
     margin-bottom: 16px;
-    opacity: 0.8;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    color: white;
+    font-weight: 600;
+}
+
+.bar-label {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.bar-value {
+    font-size: 24px;
+    font-weight: 700;
 }
 
 .content-bar.teal {
@@ -186,6 +224,30 @@
     height: 60px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.grader-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 88%;
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.3), rgba(251, 191, 36, 0.1));
+    border-radius: 12px;
+}
+
+.grader-status {
+    position: relative;
+    z-index: 1;
+    color: #fbbf24;
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 1px;
 }
 
 @media (max-width: 1024px) {
@@ -195,8 +257,9 @@
         margin-bottom: 80px;
     }
 
-    .sections-container.reverse {
-        direction: ltr;
+    .sections-container.reverse .sections-visual,
+    .sections-container.reverse .sections-content {
+        order: unset;
     }
 
     .sections-title {

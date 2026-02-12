@@ -15,7 +15,7 @@ const ResumeSections = () => {
                 >
                     <div className="section-number">1</div>
                     <h2 className="sections-title">
-                        Enhancv's Resume Checker forms<br />its ATS score with a two-tier system
+                        Hirelytic's Resume Checker forms<br />its ATS score with a two-tier system
                     </h2>
                     <p className="sections-description">
                         When you're applying for a job, there's a high chance your resume will be screened
@@ -40,9 +40,18 @@ const ResumeSections = () => {
                     <div className="mock-device">
                         <div className="device-screen">
                             <div className="screen-content">
-                                <div className="content-bar teal"></div>
-                                <div className="content-bar purple"></div>
-                                <div className="content-bar mint"></div>
+                                <div className="content-bar teal">
+                                    <span className="bar-label">ATS Score</span>
+                                    <span className="bar-value">92%</span>
+                                </div>
+                                <div className="content-bar purple">
+                                    <span className="bar-label">Keywords</span>
+                                    <span className="bar-value">85%</span>
+                                </div>
+                                <div className="content-bar mint">
+                                    <span className="bar-label">Format</span>
+                                    <span className="bar-value">88%</span>
+                                </div>
                                 <div className="content-text">
                                     <div className="text-line"></div>
                                     <div className="text-line short"></div>
@@ -68,16 +77,20 @@ const ResumeSections = () => {
                             <div className="arc-container">
                                 <svg viewBox="0 0 100 60" className="arc-svg">
                                     <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#fbbf24" strokeWidth="8" strokeLinecap="round" />
+                                    <text x="50" y="45" textAnchor="middle" fill="#fbbf24" fontSize="18" fontWeight="bold">88</text>
                                 </svg>
                             </div>
                         </div>
                         <div className="grader-dots">
-                            <span className="dot purple"></span>
-                            <span className="dot pink"></span>
-                            <span className="dot cyan"></span>
-                            <span className="dot mint"></span>
+                            <span className="dot purple" title="Content"></span>
+                            <span className="dot pink" title="Format"></span>
+                            <span className="dot cyan" title="Sections"></span>
+                            <span className="dot mint" title="Style"></span>
                         </div>
-                        <div className="grader-bar"></div>
+                        <div className="grader-bar">
+                            <div className="grader-bar-fill"></div>
+                            <span className="grader-status">Excellent Match</span>
+                        </div>
                     </div>
                 </motion.div>
 

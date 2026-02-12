@@ -43,7 +43,7 @@ const GoogleSearchIntro = ({ onComplete }) => {
             className={`search-intro-container ${fadeOut ? 'fade-out' : ''}`}
             initial={{ opacity: 0 }}
             animate={{ opacity: fadeOut ? 0 : 1 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
             <div className="search-content">
                 <div className="search-logo">
@@ -56,9 +56,9 @@ const GoogleSearchIntro = ({ onComplete }) => {
 
                 <motion.div
                     className="search-box"
-                    initial={{ scale: 0.9, opacity: 0 }}
+                    initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.3, duration: 0.5 }}
+                    transition={{ delay: 0.2, duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                 >
                     <svg className="search-icon" width="20" height="20" viewBox="0 0 20 20">
                         <path d="M9 2a7 7 0 015.657 11.314l4.515 4.514a1 1 0 01-1.415 1.415l-4.514-4.515A7 7 0 119 2zm0 2a5 5 0 100 10 5 5 0 000-10z" fill="#9CA3AF"/>
@@ -76,15 +76,15 @@ const GoogleSearchIntro = ({ onComplete }) => {
                 {showResults && (
                     <motion.div
                         className="search-results"
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
+                        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
                     >
                         <motion.div
                             className="search-result featured"
-                            initial={{ scale: 0.95 }}
+                            initial={{ scale: 0.97 }}
                             animate={{ scale: 1 }}
-                            transition={{ delay: 0.2 }}
+                            transition={{ delay: 0.15, ease: [0.4, 0, 0.2, 1] }}
                             whileHover={{ scale: 1.02 }}
                             onClick={handleResultClick}
                             style={{ cursor: 'pointer' }}

@@ -1,0 +1,59 @@
+/* Enhanced 3D Laptop Container with Three.js Canvas */
+.laptop-3d-container {
+    width: 100%;
+    height: 550px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    user-select: none;
+    background: transparent;
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.laptop-3d-container:active {
+    cursor: grabbing;
+}
+
+.laptop-3d-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    outline: none;
+    border-radius: 16px;
+}
+
+/* Glow effect for dark mode */
+[data-theme='dark'] .laptop-3d-container {
+    filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.15));
+}
+
+[data-theme='light'] .laptop-3d-container {
+    filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.1));
+}
+
+/* Responsive adjustments */
+@media (max-width: 1280px) {
+    .laptop-3d-container {
+        height: 500px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .laptop-3d-container {
+        height: 450px;
+    }
+}
+
+@media (max-width: 768px) {
+    .laptop-3d-container {
+        height: 400px;
+    }
+}
+
+@media (max-width: 480px) {
+    .laptop-3d-container {
+        height: 350px;
+    }
+}

@@ -3,6 +3,11 @@
     padding: 120px 24px;
     background: #1f2937;
     overflow: hidden;
+    transition: background 0.3s ease;
+}
+
+.dark .optimization-section {
+    background: #0f172a;
 }
 
 .optimization-gradient {
@@ -59,6 +64,11 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.dark .checklist-card {
+    background: rgba(30, 41, 59, 0.98);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
 .checklist-icon {
     font-size: 48px;
     margin-bottom: 16px;
@@ -70,6 +80,10 @@
     font-weight: 700;
     color: #1f2937;
     margin: 0 0 20px 0;
+}
+
+.dark .checklist-title {
+    color: #f8fafc;
 }
 
 .checklist-items {
@@ -88,6 +102,10 @@
     font-size: 14px;
     color: #4b5563;
     line-height: 1.6;
+}
+
+.dark .checklist-item {
+    color: #94a3b8;
 }
 
 .check-icon {

@@ -1,0 +1,95 @@
+.animated-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.animated-background + * {
+    position: relative;
+    z-index: 1;
+}
+
+.gradient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.15;
+    animation: float 20s infinite ease-in-out;
+}
+
+.blob-1 {
+    width: 500px;
+    height: 500px;
+    background: linear-gradient(135deg, #10b981, #06b6d4);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+.blob-2 {
+    width: 400px;
+    height: 400px;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    top: 40%;
+    right: -100px;
+    animation-delay: -5s;
+}
+
+.blob-3 {
+    width: 350px;
+    height: 350px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    bottom: -50px;
+    left: 40%;
+    animation-delay: -10s;
+}
+
+.blob-4 {
+    width: 380px;
+    height: 380px;
+    background: linear-gradient(135deg, #06b6d4, #10b981);
+    top: 15%;
+    left: 60%;
+    animation-delay: -15s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+    }
+    25% {
+        transform: translate(100px, -50px) scale(1.1);
+    }
+    50% {
+        transform: translate(-50px, 100px) scale(0.9);
+    }
+    75% {
+        transform: translate(-100px, -100px) scale(1.05);
+    }
+}
+
+/* Dark mode adjustments */
+.dark .gradient-blob {
+    opacity: 0.25;
+}
+
+.dark .blob-1 {
+    background: linear-gradient(135deg, #00ffff, #00ff9d);
+}
+
+.dark .blob-2 {
+    background: linear-gradient(135deg, #ff00ff, #ff6b6b);
+}
+
+.dark .blob-3 {
+    background: linear-gradient(135deg, #ffd700, #ff00ff);
+}
+
+.dark .blob-4 {
+    background: linear-gradient(135deg, #00ff9d, #00ffff);
+}

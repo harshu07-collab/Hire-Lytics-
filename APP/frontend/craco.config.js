@@ -61,6 +61,12 @@ const webpackConfig = {
                 ],
             };
 
+            // Ignore source map warnings for @mediapipe packages
+            webpackConfig.ignoreWarnings = [
+                ...(webpackConfig.ignoreWarnings || []),
+                /Failed to parse source map.*@mediapipe/,
+            ];
+
             // Add health check plugin to webpack if enabled
             if (config.enableHealthCheck && healthPluginInstance) {
                 webpackConfig.plugins.push(healthPluginInstance);

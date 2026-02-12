@@ -1,0 +1,253 @@
+.resume-machine-section {
+    padding: 100px 24px;
+    background: var(--background);
+    position: relative;
+    overflow: hidden;
+}
+
+.dark .resume-machine-section {
+    background: #0f172a;
+}
+
+.machine-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.machine-header {
+    margin-bottom: 60px;
+}
+
+.machine-title {
+    font-family: 'Work Sans', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 16px 0;
+}
+
+.dark .machine-title {
+    color: #f8fafc;
+}
+
+.machine-subtitle {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+}
+
+.dark .machine-subtitle {
+    color: #94a3b8;
+}
+
+.machine-visual {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+/* Resume Sheets */
+.resume-input,
+.resume-output {
+    flex-shrink: 0;
+}
+
+.resume-sheet {
+    width: 140px;
+    height: 180px;
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.dark .resume-sheet {
+    background: #1e293b;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.resume-sheet.output {
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+.sheet-header {
+    height: 30px;
+    background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.sheet-header.improved {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.sheet-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sheet-line {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+.dark .sheet-line {
+    background: #334155;
+}
+
+.sheet-line.short {
+    width: 60%;
+}
+
+.improved-badge {
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+/* Machine Body */
+.machine-body {
+    width: 200px;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.machine-top {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.machine-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.6);
+    letter-spacing: 2px;
+}
+
+/* Gauge */
+.machine-gauge {
+    width: 100px;
+    height: 60px;
+    margin: 0 auto 20px;
+    position: relative;
+}
+
+.gauge-arc {
+    width: 100px;
+    height: 50px;
+    border: 8px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #10b981;
+    border-radius: 100px 100px 0 0;
+    border-bottom: none;
+}
+
+.gauge-needle {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 4px;
+    height: 45px;
+    background: #fbbf24;
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-45deg);
+    border-radius: 2px;
+}
+
+/* Waveform */
+.machine-waveform {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 30px;
+    margin-bottom: 20px;
+}
+
+.wave-line {
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #10b981, #06b6d4);
+    border-radius: 2px;
+    transform-origin: bottom;
+}
+
+/* Progress Bar */
+.machine-progress {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #06b6d4);
+    border-radius: 4px;
+    width: 0%;
+}
+
+/* Status Lights */
+.machine-lights {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.light {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+}
+
+.light.active {
+    background: #ef4444;
+    box-shadow: 0 0 10px #ef4444;
+}
+
+/* Slot */
+.machine-slot {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .machine-visual {
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .resume-sheet {
+        width: 120px;
+        height: 150px;
+    }
+
+    .machine-body {
+        width: 180px;
+    }
+}

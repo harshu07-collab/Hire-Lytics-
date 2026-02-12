@@ -21,7 +21,7 @@ const HirelyticApp = ({ backendStatus }) => {
             className="hirelytic-app"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
             <Navbar />
             {backendStatus === 'offline' && (
