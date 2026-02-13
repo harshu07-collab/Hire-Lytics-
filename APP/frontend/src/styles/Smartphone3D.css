@@ -1,7 +1,7 @@
 /* Enhanced 3D Smartphone Container with Three.js Canvas */
 .smartphone-3d-container {
     width: 100%;
-    height: 550px;
+    height: 600px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,7 +9,7 @@
     user-select: none;
     background: transparent;
     position: relative;
-    border-radius: 16px;
+    border-radius: 24px;
     overflow: hidden;
 }
 
@@ -21,16 +21,16 @@
     width: 100% !important;
     height: 100% !important;
     outline: none;
-    border-radius: 16px;
+    border-radius: 24px;
 }
 
 /* Glow effect for dark mode */
 [data-theme='dark'] .smartphone-3d-container {
-    filter: drop-shadow(0 0 30px rgba(0, 255, 255, 0.15));
+    filter: drop-shadow(0 0 50px rgba(16, 185, 129, 0.2));
 }
 
 [data-theme='light'] .smartphone-3d-container {
-    filter: drop-shadow(0 10px 40px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(0 20px 60px rgba(0, 0, 0, 0.15));
 }
 
 /* Responsive adjustments */

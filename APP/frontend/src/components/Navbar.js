@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, User, LogOut } from 'lucide-react';
 import { Switch } from './ui/switch';
 import '../styles/Navbar.css';
 
@@ -9,6 +9,7 @@ const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         setMounted(true);
@@ -16,8 +17,28 @@ const Navbar = () => {
             setScrolled(window.scrollY > 50);
         };
         window.addEventListener('scroll', handleScroll);
+
+        // Check for logged in user
+        const checkUser = () => {
+            const storedUser = sessionStorage.getItem('user');
+            if (storedUser) {
+                try {
+                    setUser(JSON.parse(storedUser));
+                } catch (error) {
+                    console.error('Error parsing user data:', error);
+                }
+            }
+        };
+        checkUser();
+
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
+
+    const handleLogout = () => {
+        sessionStorage.removeItem('user');
+        setUser(null);
+        window.location.href = '/';
+    };
 
     if (!mounted) return null;
 
@@ -47,15 +68,34 @@ const Navbar = () => {
                 <div className="navbar-actions">
                     <div className="theme-toggle">
                         <Sun className="h-4 w-4 text-orange-500" />
-                        <Switch 
+                        <Switch
                             checked={theme === 'dark'}
                             onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
                             aria-label="Toggle theme"
                         />
                         <Moon className="h-4 w-4 text-blue-500" />
                     </div>
-                    <button className="btn-sign-in" data-testid="nav-sign-in-btn">Sign In</button>
-                    <button className="btn-get-started" data-testid="nav-get-started-btn">Get Started</button>
+                    {user ? (
+                        <div className="user-menu">
+                            <div className="user-info">
+                                <User className="user-icon" size={18} />
+                                <span className="user-name">{user.name}</span>
+                            </div>
+                            <button
+                                className="btn-logout"
+                                onClick={handleLogout}
+                                aria-label="Logout"
+                            >
+                                <LogOut size={18} />
+                                <span>Logout</span>
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <a href="/login" className="btn-sign-in" data-testid="nav-sign-in-btn">Sign In</a>
+                            <a href="/signup" className="btn-get-started" data-testid="nav-get-started-btn">Get Started</a>
+                        </>
+                    )}
                 </div>
             </div>
         </motion.nav>

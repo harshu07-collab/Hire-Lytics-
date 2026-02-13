@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from './Navbar';
 import Hero from './Hero';
+import ResumeMachine from './ResumeMachine';
 import ResumeAnalyzer from './ResumeAnalyzer';
 import OptimizationChecklist from './OptimizationChecklist';
 import ResumeSections from './ResumeSections';
@@ -37,6 +38,7 @@ const HirelyticApp = ({ backendStatus }) => {
                 </div>
             )}
             <Hero />
+            <ResumeMachine />
             <ResumeAnalyzer backendStatus={backendStatus} />
             <OptimizationChecklist />
             <ResumeSections />

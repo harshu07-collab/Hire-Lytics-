@@ -5,7 +5,7 @@ import { useTheme } from 'next-themes';
 import * as THREE from 'three';
 import '../styles/Smartphone3D.css';
 
-// Simple Smartphone Screen Texture Generator
+// Enhanced Smartphone Screen Texture Generator - Modern Hire-Lytics UI
 function createSmartphoneScreenTexture(theme) {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
@@ -13,100 +13,212 @@ function createSmartphoneScreenTexture(theme) {
     const ctx = canvas.getContext('2d');
     const isDark = theme === 'dark';
 
-    // Background - bright solid color
-    ctx.fillStyle = isDark ? '#111111' : '#ffffff';
+    // Background gradient
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    if (isDark) {
+        bgGradient.addColorStop(0, '#0f172a');
+        bgGradient.addColorStop(1, '#1e293b');
+    } else {
+        bgGradient.addColorStop(0, '#f8fafc');
+        bgGradient.addColorStop(1, '#ffffff');
+    }
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Header bar
-    ctx.fillStyle = isDark ? '#00aaaa' : '#10b981';
-    ctx.fillRect(0, 0, canvas.width, 100);
+    // Status bar
+    ctx.fillStyle = isDark ? '#0f172a' : '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, 60);
+    ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+    ctx.font = 'bold 24px Arial, sans-serif';
+    ctx.fillText('9:41', 40, 40);
+    
+    // Header with gradient
+    const headerGradient = ctx.createLinearGradient(0, 60, 0, 160);
+    headerGradient.addColorStop(0, '#10b981');
+    headerGradient.addColorStop(1, '#059669');
+    ctx.fillStyle = headerGradient;
+    ctx.fillRect(0, 60, canvas.width, 100);
 
-    // Logo text
+    // Logo and brand
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 36px Arial, sans-serif';
-    ctx.fillText('HIRE-LYTICS', 30, 65);
+    ctx.font = 'bold 40px Arial, sans-serif';
+    ctx.fillText('Hire-Lytics', 50, 130);
+    
+    // Menu icon
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    for (let i = 0; i < 3; i++) {
+        ctx.fillRect(900, 95 + i * 12, 40, 6);
+    }
 
-    // Hero title
-    ctx.fillStyle = isDark ? '#ffffff' : '#000000';
-    ctx.font = 'bold 48px Arial, sans-serif';
-    ctx.fillText('AI-Powered', 40, 180);
-    ctx.fillText('Resume Analysis', 40, 240);
+    // Hero Section
+    const heroY = 220;
+    ctx.fillStyle = isDark ? '#f8fafc' : '#1f2937';
+    ctx.font = 'bold 56px Arial, sans-serif';
+    ctx.fillText('AI-Powered', 50, heroY);
+    ctx.fillText('Resume', 50, heroY + 70);
+    ctx.fillStyle = '#10b981';
+    ctx.fillText('Enhancement', 50, heroY + 140);
 
     // Subtitle
-    ctx.fillStyle = isDark ? '#00ff9d' : '#3b82f6';
+    ctx.fillStyle = isDark ? '#94a3b8' : '#6b7280';
+    ctx.font = '28px Arial, sans-serif';
+    ctx.fillText('Transform your resume with', 50, heroY + 200);
+    ctx.fillText('intelligent AI analysis', 50, heroY + 240);
+
+    // Stats Cards - Modern design
+    const cardY = 560;
+    const cardWidth = 430;
+    const cardHeight = 180;
+    const gap = 64;
+
+    // Card 1 - ATS Score
+    const card1Gradient = ctx.createLinearGradient(50, cardY, 50, cardY + cardHeight);
+    card1Gradient.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.1)');
+    card1Gradient.addColorStop(1, isDark ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.02)');
+    ctx.fillStyle = card1Gradient;
+    ctx.beginPath();
+    ctx.roundRect(50, cardY, cardWidth, cardHeight, 20);
+    ctx.fill();
+    ctx.strokeStyle = '#10b981';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#10b981';
+    ctx.font = 'bold 72px Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('95%', 50 + cardWidth/2, cardY + 85);
+    ctx.fillStyle = isDark ? '#94a3b8' : '#6b7280';
     ctx.font = '24px Arial, sans-serif';
-    ctx.fillText('Optimize your resume', 40, 300);
-    ctx.fillText('with AI technology', 40, 335);
+    ctx.fillText('ATS Score', 50 + cardWidth/2, cardY + 125);
 
-    // Stats cards
-    const cardData = [
-        { value: '92%', label: 'ATS Score', color: isDark ? '#00ffff' : '#10b981' },
-        { value: 'Top 5%', label: 'Ranking', color: isDark ? '#00ff9d' : '#3b82f6' }
+    // Card 2 - Success Rate
+    const card2Gradient = ctx.createLinearGradient(50 + cardWidth + gap, cardY, 50 + cardWidth + gap, cardY + cardHeight);
+    card2Gradient.addColorStop(0, isDark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)');
+    card2Gradient.addColorStop(1, isDark ? 'rgba(59, 130, 246, 0.05)' : 'rgba(59, 130, 246, 0.02)');
+    ctx.fillStyle = card2Gradient;
+    ctx.beginPath();
+    ctx.roundRect(50 + cardWidth + gap, cardY, cardWidth, cardHeight, 20);
+    ctx.fill();
+    ctx.strokeStyle = '#3b82f6';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#3b82f6';
+    ctx.font = 'bold 72px Arial, sans-serif';
+    ctx.fillText('50K+', 50 + cardWidth + gap + cardWidth/2, cardY + 85);
+    ctx.fillStyle = isDark ? '#94a3b8' : '#6b7280';
+    ctx.font = '24px Arial, sans-serif';
+    ctx.fillText('Resumes', 50 + cardWidth + gap + cardWidth/2, cardY + 125);
+    ctx.textAlign = 'left';
+
+    // Performance Metrics Section
+    const metricsY = 820;
+    ctx.fillStyle = isDark ? '#f8fafc' : '#1f2937';
+    ctx.font = 'bold 32px Arial, sans-serif';
+    ctx.fillText('Performance Metrics', 50, metricsY);
+
+    const metrics = [
+        { label: 'Keywords Match', value: 0.95, color: '#10b981' },
+        { label: 'Format Score', value: 0.88, color: '#3b82f6' },
+        { label: 'Content Quality', value: 0.92, color: '#8b5cf6' },
+        { label: 'ATS Compatibility', value: 0.96, color: '#f59e0b' }
     ];
 
-    cardData.forEach((card, i) => {
-        const y = 400 + i * 200;
+    metrics.forEach((metric, i) => {
+        const y = metricsY + 50 + i * 90;
         
-        ctx.fillStyle = isDark ? '#1a1a1a' : '#f0f0f0';
-        ctx.fillRect(50, y, 924, 160);
+        // Label
+        ctx.fillStyle = isDark ? '#cbd5e1' : '#4b5563';
+        ctx.font = '22px Arial, sans-serif';
+        ctx.fillText(metric.label, 50, y);
 
-        ctx.strokeStyle = card.color;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(50, y, 924, 160);
-
-        ctx.fillStyle = card.color;
-        ctx.font = 'bold 64px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(card.value, 512, y + 80);
-
-        ctx.fillStyle = isDark ? '#aaaaaa' : '#666666';
-        ctx.font = '24px Arial, sans-serif';
-        ctx.fillText(card.label, 512, y + 125);
-        ctx.textAlign = 'left';
-    });
-
-    const analyticsY = 820;
-    
-    ctx.fillStyle = isDark ? '#00ffff' : '#10b981';
-    ctx.font = 'bold 28px Arial, sans-serif';
-    ctx.fillText('Performance Metrics', 50, analyticsY);
-
-    const barData = [
-        { label: 'Keywords', value: 0.92, color: isDark ? '#00ffff' : '#10b981' },
-        { label: 'Format', value: 0.85, color: isDark ? '#00ff9d' : '#3b82f6' },
-        { label: 'Content', value: 0.78, color: isDark ? '#ff6b6b' : '#ef4444' },
-        { label: 'Overall', value: 0.92, color: isDark ? '#ffd700' : '#f59e0b' }
-    ];
-
-    barData.forEach((bar, i) => {
-        const y = analyticsY + 40 + i * 80;
-        
-        ctx.fillStyle = isDark ? '#aaaaaa' : '#666666';
-        ctx.font = '20px Arial, sans-serif';
-        ctx.fillText(bar.label, 50, y);
-
-        ctx.fillStyle = isDark ? '#ffffff' : '#000000';
-        ctx.font = 'bold 20px Arial, sans-serif';
+        // Percentage
+        ctx.fillStyle = isDark ? '#f8fafc' : '#1f2937';
+        ctx.font = 'bold 22px Arial, sans-serif';
         ctx.textAlign = 'right';
-        ctx.fillText(`${Math.round(bar.value * 100)}%`, 974, y);
+        ctx.fillText(`${Math.round(metric.value * 100)}%`, 974, y);
         ctx.textAlign = 'left';
 
-        ctx.fillStyle = isDark ? '#333333' : '#dddddd';
-        ctx.fillRect(50, y + 15, 924, 20);
+        // Background bar
+        ctx.fillStyle = isDark ? '#334155' : '#e5e7eb';
+        ctx.beginPath();
+        ctx.roundRect(50, y + 15, 924, 16, 8);
+        ctx.fill();
 
-        ctx.fillStyle = bar.color;
-        ctx.fillRect(50, y + 15, 924 * bar.value, 20);
+        // Progress bar with gradient
+        const barGradient = ctx.createLinearGradient(50, 0, 50 + 924 * metric.value, 0);
+        barGradient.addColorStop(0, metric.color);
+        barGradient.addColorStop(1, metric.color + 'aa');
+        ctx.fillStyle = barGradient;
+        ctx.beginPath();
+        ctx.roundRect(50, y + 15, 924 * metric.value, 16, 8);
+        ctx.fill();
     });
 
-    const btnY = 1280;
-    ctx.fillStyle = isDark ? '#00aaaa' : '#10b981';
-    ctx.fillRect(50, btnY, 924, 60);
+    // Feature Tags
+    const tagsY = 1280;
+    const tags = ['ATS Optimized', 'AI Enhanced', 'Instant Results'];
+    const tagColors = ['#10b981', '#3b82f6', '#8b5cf6'];
+    let tagX = 50;
+
+    tags.forEach((tag, i) => {
+        const tagWidth = ctx.measureText(tag).width + 60;
+        
+        // Tag background
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+        ctx.beginPath();
+        ctx.roundRect(tagX, tagsY, tagWidth, 56, 28);
+        ctx.fill();
+        ctx.strokeStyle = tagColors[i];
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Tag text
+        ctx.fillStyle = tagColors[i];
+        ctx.font = 'bold 22px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(tag, tagX + tagWidth/2, tagsY + 36);
+        ctx.textAlign = 'left';
+        
+        tagX += tagWidth + 24;
+    });
+
+    // CTA Button
+    const btnY = 1400;
+    const btnGradient = ctx.createLinearGradient(50, btnY, 50, btnY + 80);
+    btnGradient.addColorStop(0, '#10b981');
+    btnGradient.addColorStop(1, '#059669');
+    ctx.fillStyle = btnGradient;
+    ctx.beginPath();
+    ctx.roundRect(50, btnY, 924, 80, 16);
+    ctx.fill();
+
+    // Button shadow
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.4)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 8;
+    ctx.beginPath();
+    ctx.roundRect(50, btnY, 924, 80, 16);
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 24px Arial, sans-serif';
+    ctx.font = 'bold 32px Arial, sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Analyze My Resume', 512, btnY + 40);
+    ctx.fillText('Analyze My Resume', 512, btnY + 50);
     ctx.textAlign = 'left';
+
+    // Bottom navigation bar
+    ctx.fillStyle = isDark ? '#0f172a' : '#ffffff';
+    ctx.fillRect(0, 1988, canvas.width, 60);
+    
+    // Home indicator
+    ctx.fillStyle = isDark ? '#475569' : '#cbd5e1';
+    ctx.beginPath();
+    ctx.roundRect(362, 2008, 300, 8, 4);
+    ctx.fill();
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
@@ -139,15 +251,23 @@ function SmartphoneModel({ theme }) {
 
     const bodyMaterial = useMemo(() => new THREE.MeshStandardMaterial({
         color: phoneColor,
-        metalness: 0.8,
-        roughness: 0.2,
-        envMapIntensity: 1.5,
+        metalness: 0.9,
+        roughness: 0.15,
+        envMapIntensity: 1.8,
     }), [phoneColor]);
+
+    const frameMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+        color: isDark ? '#2a2a2a' : '#e5e5e5',
+        metalness: 0.95,
+        roughness: 0.1,
+        envMapIntensity: 2.0,
+    }), [isDark]);
 
     const screenMaterial = useMemo(() => {
         if (screenTexture) {
             return new THREE.MeshBasicMaterial({
                 map: screenTexture,
+                toneMapped: false,
             });
         }
         return new THREE.MeshStandardMaterial({
@@ -163,46 +283,90 @@ function SmartphoneModel({ theme }) {
             onPointerOver={() => setHovered(true)}
             onPointerOut={() => setHovered(false)}
         >
-            {/* Phone Body */}
-            <RoundedBox args={[1.4, 2.8, 0.12]} radius={0.12} smoothness={4} castShadow receiveShadow>
+            {/* Phone Body - Main Frame */}
+            <RoundedBox args={[1.42, 2.82, 0.12]} radius={0.14} smoothness={8} castShadow receiveShadow>
+                <primitive object={frameMaterial} attach="material" />
+            </RoundedBox>
+
+            {/* Phone Body - Back Panel */}
+            <RoundedBox args={[1.38, 2.78, 0.10]} radius={0.13} smoothness={8} castShadow receiveShadow>
                 <primitive object={bodyMaterial} attach="material" />
             </RoundedBox>
 
+            {/* Screen Bezel */}
+            <mesh position={[0, 0, 0.06]}>
+                <planeGeometry args={[1.30, 2.70]} />
+                <meshStandardMaterial color="#000000" metalness={0.5} roughness={0.5} />
+            </mesh>
+
             {/* Screen */}
             <mesh position={[0, 0, 0.065]}>
-                <planeGeometry args={[1.28, 2.68]} />
+                <planeGeometry args={[1.26, 2.66]} />
                 <primitive object={screenMaterial} attach="material" />
             </mesh>
 
+            {/* Camera Module on Back */}
+            <group position={[0.35, 0.8, -0.07]} rotation={[0, Math.PI, 0]}>
+                {/* Camera bump */}
+                <RoundedBox args={[0.5, 0.6, 0.04]} radius={0.08} smoothness={4}>
+                    <meshStandardMaterial
+                        color={isDark ? '#1a1a1a' : '#2a2a2a'}
+                        metalness={0.8}
+                        roughness={0.2}
+                    />
+                </RoundedBox>
+                
+                {/* Main camera lens */}
+                <mesh position={[-0.12, 0.15, 0.025]}>
+                    <circleGeometry args={[0.12, 32]} />
+                    <meshStandardMaterial
+                        color="#0a0a0a"
+                        metalness={0.9}
+                        roughness={0.1}
+                    />
+                </mesh>
+                <mesh position={[-0.12, 0.15, 0.03]}>
+                    <circleGeometry args={[0.08, 32]} />
+                    <meshStandardMaterial
+                        color="#1a1a2e"
+                        metalness={0.95}
+                        roughness={0.05}
+                    />
+                </mesh>
+                
+                {/* Secondary camera lens */}
+                <mesh position={[-0.12, -0.15, 0.025]}>
+                    <circleGeometry args={[0.10, 32]} />
+                    <meshStandardMaterial
+                        color="#0a0a0a"
+                        metalness={0.9}
+                        roughness={0.1}
+                    />
+                </mesh>
+                
+                {/* Third camera lens */}
+                <mesh position={[0.12, 0, 0.025]}>
+                    <circleGeometry args={[0.08, 32]} />
+                    <meshStandardMaterial
+                        color="#0a0a0a"
+                        metalness={0.9}
+                        roughness={0.1}
+                    />
+                </mesh>
+            </group>
+
             {/* Logo on Back */}
-            <mesh position={[0, 0.5, -0.065]} rotation={[0, Math.PI, 0]}>
-                <circleGeometry args={[0.15, 32]} />
+            <mesh position={[-0.3, -0.5, -0.065]} rotation={[0, Math.PI, 0]}>
+                <circleGeometry args={[0.12, 32]} />
                 <meshStandardMaterial
-                    color={isDark ? '#00aaaa' : '#10b981'}
-                    emissive={isDark ? '#00aaaa' : '#10b981'}
-                    emissiveIntensity={isDark ? 0.8 : 0.4}
+                    color={isDark ? '#10b981' : '#059669'}
+                    emissive={isDark ? '#10b981' : '#059669'}
+                    emissiveIntensity={isDark ? 0.6 : 0.3}
                     metalness={0.9}
                     roughness={0.1}
                 />
             </mesh>
 
-            {/* Simple Camera on Back */}
-            <mesh position={[0, -0.3, -0.065]} rotation={[0, Math.PI, 0]}>
-                <circleGeometry args={[0.08, 32]} />
-                <meshStandardMaterial
-                    color="#1a1a1a"
-                    metalness={0.9}
-                    roughness={0.1}
-                />
-            </mesh>
-            <mesh position={[0, -0.3, -0.07]} rotation={[0, Math.PI, 0]}>
-                <circleGeometry args={[0.05, 32]} />
-                <meshStandardMaterial
-                    color="#000000"
-                    emissive={isDark ? '#00aaaa' : '#3b82f6'}
-                    emissiveIntensity={isDark ? 0.5 : 0.2}
-                />
-            </mesh>
         </group>
     );
 }

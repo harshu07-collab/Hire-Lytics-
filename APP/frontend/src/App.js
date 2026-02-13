@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'next-themes';
 import '@/App.css';
 import GoogleSearchIntro from './components/GoogleSearchIntro';
 import HirelyticApp from './components/HirelyticApp';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 
 function App() {
     const [showIntro, setShowIntro] = useState(true);
@@ -49,13 +52,21 @@ function App() {
 
     return (
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <div className="App">
-                {showIntro && !hasSeenIntro ? (
-                    <GoogleSearchIntro onComplete={handleIntroComplete} />
-                ) : (
-                    <HirelyticApp backendStatus={backendStatus} />
-                )}
-            </div>
+            <Router>
+                <div className="App">
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<Signup />} />
+                        <Route path="/" element={
+                            showIntro && !hasSeenIntro ? (
+                                <GoogleSearchIntro onComplete={handleIntroComplete} />
+                            ) : (
+                                <HirelyticApp backendStatus={backendStatus} />
+                            )
+                        } />
+                    </Routes>
+                </div>
+            </Router>
         </ThemeProvider>
     );
 }
