@@ -67,6 +67,13 @@ const webpackConfig = {
                 /Failed to parse source map.*@mediapipe/,
             ];
 
+            // Add loader for GLSL shader files
+            webpackConfig.module.rules.push({
+                test: /\.(glsl|vs|fs|vert|frag)$/,
+                exclude: /node_modules/,
+                use: ['raw-loader'],
+            });
+
             // Add health check plugin to webpack if enabled
             if (config.enableHealthCheck && healthPluginInstance) {
                 webpackConfig.plugins.push(healthPluginInstance);

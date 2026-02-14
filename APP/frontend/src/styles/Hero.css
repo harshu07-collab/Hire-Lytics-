@@ -198,6 +198,13 @@
     width: 100%;
 }
 
+.datacore-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .floating-element {
     position: absolute;
     z-index: 10;

@@ -9,7 +9,7 @@ const Hero = () => {
     const { scrollY } = useScroll();
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    
+
     const y = useTransform(scrollY, [0, 500], [0, 150]);
     const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 

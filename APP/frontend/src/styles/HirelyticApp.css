@@ -6,3 +6,80 @@
 .dark .hirelytic-app {
     background: #0f172a;
 }
+
+/* Living Data Core Section */
+.data-core-section {
+    position: relative;
+    width: 100%;
+    padding: 6rem 0;
+    background: linear-gradient(180deg,
+        #f8fafc 0%,
+        rgba(16, 185, 129, 0.02) 50%,
+        #f8fafc 100%
+    );
+    overflow: hidden;
+}
+
+.dark .data-core-section {
+    background: linear-gradient(180deg,
+        #0f172a 0%,
+        rgba(0, 255, 255, 0.03) 50%,
+        #0f172a 100%
+    );
+}
+
+.data-core-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.data-core-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.data-core-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.dark .data-core-title {
+    background: linear-gradient(135deg, #00ffff 0%, #00ff9d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.data-core-subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.dark .data-core-subtitle {
+    color: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .data-core-section {
+        padding: 4rem 0;
+    }
+
+    .data-core-content {
+        padding: 0 1rem;
+    }
+
+    .data-core-header {
+        margin-bottom: 2rem;
+    }
+}

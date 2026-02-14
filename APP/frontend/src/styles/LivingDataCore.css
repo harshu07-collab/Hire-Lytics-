@@ -1,0 +1,167 @@
+/* Living Data Core - Premium Styling */
+
+.living-data-core-container {
+    position: relative;
+    width: 100%;
+    height: 700px;
+    min-height: 700px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, rgba(0, 255, 65, 0.1) 0%, rgba(16, 255, 88, 0.05) 50%, transparent 70%);
+    margin: 4rem 0;
+    z-index: 1;
+    border-radius: 20px;
+}
+
+/* Dark mode background - PURPLE GRADIENT */
+:root[class~="dark"] .living-data-core-container {
+    background: radial-gradient(ellipse at center, rgba(124, 58, 237, 0.1) 0%, rgba(168, 85, 247, 0.05) 50%, rgba(0, 0, 0, 0.3) 70%);
+}
+
+/* Ensure canvas is responsive */
+.living-data-core-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    cursor: pointer;
+    touch-action: none;
+}
+
+/* Interaction hint */
+.interaction-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+    font-weight: 500;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeInHint 0.8s ease-out 1.5s forwards;
+    z-index: 10;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeInHint {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.interaction-hint svg {
+    width: 20px;
+    height: 20px;
+    color: var(--primary, #10b981);
+}
+
+/* Dark mode adjustments */
+:root[class~="dark"] .interaction-hint {
+    background: rgba(0, 0, 0, 0.5);
+    border-color: rgba(0, 255, 255, 0.3);
+    color: #cbd5e1;
+    box-shadow: 0 8px 32px rgba(0, 255, 255, 0.15);
+}
+
+:root[class~="dark"] .interaction-hint svg {
+    color: #00ffff;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.5));
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .living-data-core-container {
+        height: 500px;
+        margin: 2rem 0;
+    }
+
+    .interaction-hint {
+        font-size: 0.8rem;
+        padding: 0.75rem 1.25rem;
+        bottom: 1.5rem;
+        gap: 0.5rem;
+    }
+
+    .interaction-hint svg {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+    .living-data-core-container {
+        height: 400px;
+        border-radius: 12px;
+    }
+
+    .interaction-hint {
+        font-size: 0.75rem;
+        padding: 0.5rem 1rem;
+        bottom: 1rem;
+    }
+}
+
+/* Performance optimization */
+.living-data-core-container {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Smooth transitions */
+.living-data-core-container * {
+    transition: opacity 0.3s ease;
+}
+
+/* Ambient glow effect - NEON ENHANCED */
+.living-data-core-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 85%;
+    height: 85%;
+    background: radial-gradient(circle, rgba(0, 255, 65, 0.18) 0%, rgba(16, 255, 88, 0.1) 40%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: pulse-glow 3.5s ease-in-out infinite;
+    z-index: 0;
+    filter: blur(40px);
+}
+
+:root[class~="dark"] .living-data-core-container::before {
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, rgba(168, 85, 247, 0.12) 40%, transparent 70%);
+    filter: blur(45px);
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 0.6;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(1.12);
+    }
+}
+
+/* Canvas wrapper for better layering */
+.living-data-core-container > canvas {
+    position: relative;
+    z-index: 1;
+}
