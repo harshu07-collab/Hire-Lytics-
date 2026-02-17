@@ -5,74 +5,57 @@ import '../styles/ResumeMachine.css';
 const ResumeMachine = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [cycleCount, setCycleCount] = useState(0);
-    const [cursorPosition, setCursorPosition] = useState({ x: 0, y: 0 });
-    const [isClicking, setIsClicking] = useState(false);
-    const [currentStep, setCurrentStep] = useState(0);
-    const [showInterface, setShowInterface] = useState(false);
+    const [processingStage, setProcessingStage] = useState(0);
+    const [resumePosition, setResumePosition] = useState(0); // 0-100% along conveyor
 
     useEffect(() => {
-        // Auto-start animation cycle with cursor interaction
+        // Auto-start animation cycle
         const interval = setInterval(() => {
             setIsProcessing(true);
             setCycleCount(prev => prev + 1);
-            setCurrentStep(0);
-            setShowInterface(true);
+            setProcessingStage(0);
+            setResumePosition(0);
+
+            // Stage 1: Resume enters conveyor (0-25%)
+            setTimeout(() => {
+                setProcessingStage(1);
+                setResumePosition(25);
+            }, 500);
+
+            // Stage 2: Scanning station (25-40%)
+            setTimeout(() => {
+                setProcessingStage(2);
+                setResumePosition(40);
+            }, 2000);
+
+            // Stage 3: AI Processing station (40-60%)
+            setTimeout(() => {
+                setProcessingStage(3);
+                setResumePosition(60);
+            }, 4000);
+
+            // Stage 4: Enhancement station (60-80%)
+            setTimeout(() => {
+                setProcessingStage(4);
+                setResumePosition(80);
+            }, 6000);
+
+            // Stage 5: Exit conveyor (80-100%)
+            setTimeout(() => {
+                setProcessingStage(5);
+                setResumePosition(100);
+            }, 8000);
 
             // Reset after animation completes
             setTimeout(() => {
                 setIsProcessing(false);
-                setShowInterface(false);
-            }, 12000); // Extended animation duration
-        }, 15000); // Cycle every 15 seconds
+                setProcessingStage(0);
+                setResumePosition(0);
+            }, 10000);
+        }, 12000); // Cycle every 12 seconds
 
         return () => clearInterval(interval);
     }, []);
-
-    // Cursor animation sequence
-    useEffect(() => {
-        if (!isProcessing) return;
-
-        const cursorSequence = [
-            // Step 1: Move to sidebar menu (Manage Sections)
-            { step: 0, delay: 500, x: -320, y: -150, click: false },
-            { step: 1, delay: 1000, x: -320, y: -150, click: true },
-
-            // Step 2: Move to "Write & improve my resume" button in chat
-            { step: 2, delay: 1800, x: -100, y: -80, click: false },
-            { step: 3, delay: 2300, x: -100, y: -80, click: true },
-
-            // Step 3: Move to bullet points area in chat
-            { step: 4, delay: 3500, x: -80, y: 60, click: false },
-            { step: 5, delay: 4000, x: -80, y: 60, click: true },
-
-            // Step 4: Move to AI Assistant icon in sidebar
-            { step: 6, delay: 5200, x: -320, y: -60, click: false },
-            { step: 7, delay: 5700, x: -320, y: -60, click: true },
-
-            // Step 5: Move to check icon in sidebar
-            { step: 8, delay: 7000, x: -320, y: 0, click: false },
-            { step: 9, delay: 7500, x: -320, y: 0, click: true },
-
-            // Step 6: Hover over enhanced resume preview
-            { step: 10, delay: 9000, x: 220, y: 80, click: false },
-            { step: 11, delay: 9800, x: 220, y: 80, click: true },
-
-            // Step 7: Move to download button in sidebar
-            { step: 12, delay: 11000, x: -320, y: 180, click: false },
-            { step: 13, delay: 11500, x: -320, y: 180, click: true },
-        ];
-
-        cursorSequence.forEach(({ step, delay, x, y, click }) => {
-            setTimeout(() => {
-                setCursorPosition({ x, y });
-                setCurrentStep(step);
-                if (click) {
-                    setIsClicking(true);
-                    setTimeout(() => setIsClicking(false), 300);
-                }
-            }, delay);
-        });
-    }, [isProcessing, cycleCount]);
 
     return (
         <section className="resume-machine-section">
@@ -84,830 +67,376 @@ const ResumeMachine = () => {
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
-                    <h2 className="machine-title">AI-Powered Resume Enhancement</h2>
+                    <h2 className="machine-title">AI-Powered Resume Assembly Line</h2>
                     <p className="machine-subtitle">
-                        Watch how users interact with our AI to transform their resume in real-time
+                        Watch your resume transform through our automated enhancement stations
                     </p>
                 </motion.div>
 
                 <motion.div
-                    className="machine-visual"
+                    className="assembly-line-container"
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ delay: 0.2, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
                 >
-                    {/* Animated Cursor */}
-                    <AnimatePresence>
-                        {showInterface && (
+                    {/* Main Conveyor Belt */}
+                    <div className="conveyor-belt-wrapper">
+                        {/* Conveyor Belt Track */}
+                        <div className="conveyor-track">
+                            {/* Animated Belt Surface */}
                             <motion.div
-                                className="animated-cursor"
-                                initial={{ opacity: 0, scale: 0 }}
+                                className="belt-surface"
                                 animate={{
-                                    opacity: 1,
-                                    scale: isClicking ? 0.8 : 1,
-                                    x: cursorPosition.x,
-                                    y: cursorPosition.y
+                                    backgroundPosition: isProcessing ? ['0% 0%', '100% 0%'] : '0% 0%'
                                 }}
-                                exit={{ opacity: 0, scale: 0 }}
                                 transition={{
-                                    x: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
-                                    y: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
-                                    scale: { duration: 0.2 },
-                                    opacity: { duration: 0.3 }
+                                    duration: 2,
+                                    repeat: Infinity,
+                                    ease: "linear"
                                 }}
-                            >
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                    <path
-                                        d="M8 4 L8 24 L14 18 L18 28 L22 26 L18 16 L26 16 Z"
-                                        fill="white"
-                                        stroke="#1f2937"
-                                        strokeWidth="1.5"
-                                    />
-                                    <motion.circle
-                                        cx="16"
-                                        cy="16"
-                                        r="20"
-                                        fill="none"
-                                        stroke="rgba(16, 185, 129, 0.4)"
-                                        strokeWidth="2"
-                                        initial={{ scale: 0, opacity: 0 }}
-                                        animate={isClicking ? {
-                                            scale: [1, 2],
-                                            opacity: [0.6, 0]
-                                        } : {}}
-                                        transition={{ duration: 0.6 }}
-                                    />
-                                </svg>
-                                <motion.div
-                                    className="cursor-glow"
-                                    animate={{
-                                        scale: isClicking ? [1, 1.5, 1] : 1,
-                                        opacity: isClicking ? [0.8, 0, 0.8] : 0.6
-                                    }}
-                                    transition={{ duration: 0.6 }}
-                                />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+                            />
 
-                    {/* Interactive UI Mockup */}
-                    <AnimatePresence>
-                        {showInterface && (
+                            {/* Belt Rollers */}
                             <motion.div
-                                className="ui-mockup-container"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{
-                                    opacity: 1,
-                                    scale: currentStep === 1 || currentStep === 3 || currentStep === 5 || currentStep === 7 || currentStep === 9 || currentStep === 11 || currentStep === 13 ? 1.05 : 1
-                                }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+                                className="belt-roller left-roller"
+                                animate={{ rotate: isProcessing ? 360 : 0 }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             >
-                                {/* Sidebar Menu */}
-                                <div className="sidebar-mockup">
-                                    <div className="sidebar-header">
-                                        <div className="logo-mock">📊</div>
-                                        <div className="app-name">Hire-Lytics</div>
-                                    </div>
-
-                                    <div className="sidebar-menu">
-                                        <motion.div
-                                            className="menu-item"
-                                            animate={{
-                                                backgroundColor: currentStep === 1 ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-                                                scale: currentStep === 1 ? 1.05 : 1
-                                            }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <span className="menu-icon">📝</span>
-                                            <span className="menu-text">Manage Sections</span>
-                                        </motion.div>
-
-                                        <motion.div
-                                            className="menu-item"
-                                            animate={{
-                                                backgroundColor: currentStep === 7 ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-                                                scale: currentStep === 7 ? 1.05 : 1
-                                            }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <span className="menu-icon">🤖</span>
-                                            <span className="menu-text">AI Assistant</span>
-                                        </motion.div>
-
-                                        <motion.div
-                                            className="menu-item"
-                                            animate={{
-                                                backgroundColor: currentStep === 9 ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-                                                scale: currentStep === 9 ? 1.05 : 1
-                                            }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <span className="menu-icon">✓</span>
-                                            <span className="menu-text">Check</span>
-                                        </motion.div>
-
-                                        <div className="menu-item">
-                                            <span className="menu-icon">🎨</span>
-                                            <span className="menu-text">Design & Font</span>
-                                        </div>
-
-                                        <div className="menu-item">
-                                            <span className="menu-icon">📄</span>
-                                            <span className="menu-text">Templates</span>
-                                        </div>
-
-                                        <motion.div
-                                            className="menu-item download-item"
-                                            animate={{
-                                                backgroundColor: currentStep === 13 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.1)',
-                                                scale: currentStep === 13 ? 1.08 : 1,
-                                                boxShadow: currentStep === 13 ? '0 0 20px rgba(16, 185, 129, 0.4)' : '0 2px 8px rgba(0, 0, 0, 0.1)'
-                                            }}
-                                            transition={{ duration: 0.3 }}
-                                        >
-                                            <span className="menu-icon">⬇️</span>
-                                            <span className="menu-text">Download</span>
-                                        </motion.div>
-                                    </div>
-
-                                    <div className="sidebar-footer">
-                                        <div className="branding-toggle">
-                                            <span className="toggle-label">Branding</span>
-                                            <motion.div
-                                                className="toggle-switch"
-                                                animate={{
-                                                    backgroundColor: currentStep >= 8 ? '#10b981' : '#94a3b8'
-                                                }}
-                                            >
-                                                <motion.div
-                                                    className="toggle-knob"
-                                                    animate={{
-                                                        x: currentStep >= 8 ? 16 : 0
-                                                    }}
-                                                />
-                                            </motion.div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Chat Interface Mockup */}
-                                <div className="chat-mockup">
-                                    <motion.div
-                                        className="chat-bubble user-bubble"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: currentStep >= 0 ? 1 : 0, x: 0 }}
-                                        transition={{ delay: 0.3 }}
-                                    >
-                                        <div className="bubble-text">help you today?</div>
-                                        <div className="bubble-time">AI Assistant - 15:33</div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="chat-bubble assistant-bubble highlight-bubble"
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{
-                                            opacity: currentStep >= 2 ? 1 : 0,
-                                            x: 0,
-                                            scale: currentStep === 3 ? 1.05 : 1,
-                                            boxShadow: currentStep === 3 ?
-                                                "0 0 30px rgba(16, 185, 129, 0.4)" :
-                                                "0 4px 12px rgba(0, 0, 0, 0.1)"
-                                        }}
-                                        transition={{ delay: 1.8 }}
-                                    >
-                                        <div className="bubble-text">Write & improve my resume</div>
-                                        <div className="bubble-time">You - 15:33</div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="chat-bubble user-bubble"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: currentStep >= 4 ? 1 : 0, x: 0 }}
-                                        transition={{ delay: 3.5 }}
-                                    >
-                                        <div className="bubble-text">How do you want to improve your resume?</div>
-                                        <div className="bubble-time">AI Assistant - 15:33</div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="chat-bubble assistant-bubble highlight-bubble"
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{
-                                            opacity: currentStep >= 4 ? 1 : 0,
-                                            x: 0,
-                                            scale: currentStep === 5 ? 1.05 : 1,
-                                            boxShadow: currentStep === 5 ?
-                                                "0 0 30px rgba(16, 185, 129, 0.4)" :
-                                                "0 4px 12px rgba(0, 0, 0, 0.1)"
-                                        }}
-                                        transition={{ delay: 3.8 }}
-                                    >
-                                        <div className="bubble-text">Re-write my bullets to show impact</div>
-                                        <div className="bubble-time">You - 15:33</div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="chat-bubble user-bubble processing-bubble"
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: currentStep >= 6 ? 1 : 0, x: 0 }}
-                                        transition={{ delay: 5.5 }}
-                                    >
-                                        <div className="bubble-text">
-                                            <motion.span
-                                                animate={{ opacity: [0.3, 1, 0.3] }}
-                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                            >
-                                                Processing your request...
-                                            </motion.span>
-                                        </div>
-                                        <div className="bubble-time">AI Assistant - 15:34</div>
-                                    </motion.div>
-
-                                    <motion.div
-                                        className="chat-bubble user-bubble success-bubble"
-                                        initial={{ opacity: 0, x: -20, scale: 0.9 }}
-                                        animate={{
-                                            opacity: currentStep >= 10 ? 1 : 0,
-                                            x: 0,
-                                            scale: currentStep >= 10 ? 1 : 0.9
-                                        }}
-                                        transition={{ delay: 9.2 }}
-                                    >
-                                        <div className="bubble-text">
-                                            ✨ Your resume has been enhanced! Check the preview on the right.
-                                        </div>
-                                        <div className="bubble-time">AI Assistant - 15:34</div>
-                                    </motion.div>
-                                </div>
-
-                                {/* Resume Preview Mockup */}
-                                <motion.div
-                                    className="resume-preview-mockup"
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{
-                                        opacity: currentStep >= 6 ? 1 : 0,
-                                        scale: currentStep === 7 ? 1.08 : currentStep >= 6 ? 1 : 0.95,
-                                        y: currentStep >= 6 ? 0 : 20
-                                    }}
-                                    transition={{ delay: 7, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                                >
-                                    <div className="resume-header-mock">
-                                        <div className="resume-title-mock">STRENGTHS</div>
-                                        <div className="strength-badge">
-                                            <span className="badge-icon-mock">🎯</span>
-                                            Strategic Leadership
-                                        </div>
-                                    </div>
-                                    <div className="resume-content-mock">
-                                        <div className="skill-item-mock">
-                                            <span className="check-icon">✓</span>
-                                            <span>Problem-Solving Skills</span>
-                                        </div>
-                                        <div className="skill-item-mock">
-                                            <span className="check-icon">✓</span>
-                                            <span>Effective Communication</span>
-                                        </div>
-                                    </div>
-                                    <div className="skills-section-mock">
-                                        <div className="skill-tag-mock">Cloud Computing</div>
-                                        <div className="skill-tag-mock">Project Management</div>
-                                        <div className="skill-tag-mock">IT Security</div>
-                                    </div>
-                                </motion.div>
+                                <div className="roller-inner"></div>
                             </motion.div>
-                        )}
-                    </AnimatePresence>
-                    {/* Machine Body */}
-                    <div className="machine-body">
-                        {/* Input Slot */}
-                        <div className="input-slot">
-                            <div className="slot-label">Input</div>
-                            <div className="slot-opening">
-                                <motion.div
-                                    className="slot-light"
-                                    animate={{
-                                        opacity: [0.3, 1, 0.3],
-                                        scale: [1, 1.2, 1]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                />
-                            </div>
-                        </div>
+                            <motion.div
+                                className="belt-roller right-roller"
+                                animate={{ rotate: isProcessing ? 360 : 0 }}
+                                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                            >
+                                <div className="roller-inner"></div>
+                            </motion.div>
 
-                        {/* Processing Core */}
-                        <div className="processing-core">
-                            {/* Enhanced Multi-layer Glow */}
-                            <div className="core-glow">
-                                <motion.div
-                                    className="glow-ring"
-                                    animate={{
-                                        rotate: 360,
-                                        scale: [1, 1.1, 1]
-                                    }}
-                                    transition={{
-                                        rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                                        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
-                                    }}
-                                />
-                                <motion.div
-                                    className="glow-ring-2"
-                                    animate={{
-                                        rotate: -360,
-                                        scale: [1.1, 1, 1.1]
-                                    }}
-                                    transition={{
-                                        rotate: { duration: 4, repeat: Infinity, ease: "linear" },
-                                        scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }
-                                    }}
-                                />
-                                <motion.div
-                                    className="glow-ring-3"
-                                    animate={{
-                                        rotate: 360,
-                                        scale: [1, 1.15, 1],
-                                        opacity: [0.3, 0.6, 0.3]
-                                    }}
-                                    transition={{
-                                        rotate: { duration: 5, repeat: Infinity, ease: "linear" },
-                                        scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-                                        opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
-                                    }}
-                                />
-                            </div>
-
-                            {/* Energy Flow Lines */}
-                            <div className="energy-flows">
-                                {[...Array(6)].map((_, i) => (
-                                    <motion.div
-                                        key={`flow-${i}`}
-                                        className="energy-line"
-                                        style={{
-                                            transform: `rotate(${i * 60}deg)`
-                                        }}
-                                        animate={{
-                                            opacity: [0, 1, 0],
-                                            scale: [0.8, 1.2, 0.8]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            delay: i * 0.3,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                ))}
-                            </div>
-
-                            <div className="core-center">
-                                {/* Enhanced SVG with multiple layers */}
-                                <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
-                                    {/* Outer hexagon */}
-                                    <motion.path
-                                        d="M50 15 L75 30 L75 60 L50 75 L25 60 L25 30 Z"
-                                        stroke="url(#coreGradient)"
-                                        strokeWidth="2"
-                                        fill="none"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{
-                                            pathLength: [0, 1, 1, 0],
-                                            opacity: [0, 1, 1, 0]
-                                        }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    {/* Middle hexagon */}
-                                    <motion.path
-                                        d="M50 20 L70 32.5 L70 57.5 L50 70 L30 57.5 L30 32.5 Z"
-                                        stroke="url(#coreGradient2)"
-                                        strokeWidth="2"
-                                        fill="none"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{
-                                            pathLength: [0, 1, 1, 0],
-                                            opacity: [0, 1, 1, 0]
-                                        }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            delay: 0.5,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    {/* Inner hexagon */}
-                                    <motion.path
-                                        d="M50 25 L65 35 L65 55 L50 65 L35 55 L35 35 Z"
-                                        stroke="url(#coreGradient3)"
-                                        strokeWidth="2.5"
-                                        fill="rgba(6, 182, 212, 0.1)"
-                                        initial={{ pathLength: 0, opacity: 0 }}
-                                        animate={{
-                                            pathLength: [0, 1, 1, 0],
-                                            opacity: [0, 1, 1, 0]
-                                        }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            delay: 1,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    {/* Circuit pattern */}
-                                    <motion.circle
-                                        cx="50"
-                                        cy="50"
-                                        r="8"
-                                        stroke="#10b981"
-                                        strokeWidth="2"
-                                        fill="none"
-                                        animate={{
-                                            scale: [1, 1.3, 1],
-                                            opacity: [0.5, 1, 0.5]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    <defs>
-                                        <linearGradient id="coreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" stopColor="#06b6d4" />
-                                            <stop offset="50%" stopColor="#10b981" />
-                                            <stop offset="100%" stopColor="#06b6d4" />
-                                        </linearGradient>
-                                        <linearGradient id="coreGradient2" x1="100%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stopColor="#10b981" />
-                                            <stop offset="50%" stopColor="#06b6d4" />
-                                            <stop offset="100%" stopColor="#10b981" />
-                                        </linearGradient>
-                                        <linearGradient id="coreGradient3" x1="50%" y1="0%" x2="50%" y2="100%">
-                                            <stop offset="0%" stopColor="#06b6d4" />
-                                            <stop offset="100%" stopColor="#10b981" />
-                                        </linearGradient>
-                                    </defs>
-                                </svg>
-
-                                <motion.div
-                                    className="ai-text"
-                                    animate={{
-                                        opacity: [0.5, 1, 0.5],
-                                        scale: [0.95, 1.05, 0.95]
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut"
-                                    }}
-                                >
-                                    AI
-                                </motion.div>
-                            </div>
-
-                            {/* Enhanced Processing Particles */}
+                            {/* Resume Document on Belt */}
                             <AnimatePresence>
                                 {isProcessing && (
-                                    <>
-                                        {/* Primary particles */}
-                                        {[...Array(12)].map((_, i) => (
+                                    <motion.div
+                                        key={`resume-${cycleCount}`}
+                                        className="resume-on-belt"
+                                        initial={{ x: '-120%', opacity: 0 }}
+                                        animate={{
+                                            x: `${resumePosition}%`,
+                                            opacity: resumePosition < 100 ? 1 : 0
+                                        }}
+                                        exit={{ x: '120%', opacity: 0 }}
+                                        transition={{
+                                            x: { duration: 8, ease: "linear" },
+                                            opacity: { duration: 0.5 }
+                                        }}
+                                    >
+                                        <div className="document-icon">📄</div>
+                                        <div className="document-lines">
+                                            <div className="doc-line"></div>
+                                            <div className="doc-line short"></div>
+                                            <div className="doc-line"></div>
+                                        </div>
+
+                                        {/* Enhancement Glow Effect */}
+                                        {processingStage >= 3 && (
                                             <motion.div
-                                                key={`particle-${cycleCount}-${i}`}
-                                                className="processing-particle"
-                                                initial={{
-                                                    x: 0,
-                                                    y: 0,
-                                                    opacity: 0,
-                                                    scale: 0
-                                                }}
-                                                animate={{
-                                                    x: Math.cos((i * Math.PI * 2) / 12) * 90,
-                                                    y: Math.sin((i * Math.PI * 2) / 12) * 90,
-                                                    opacity: [0, 1, 0.5, 0],
-                                                    scale: [0, 1.2, 0.8, 0]
-                                                }}
-                                                transition={{
-                                                    duration: 2,
-                                                    delay: i * 0.08,
-                                                    ease: "easeOut"
-                                                }}
+                                                className="enhancement-glow"
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: [0, 1, 0] }}
+                                                transition={{ duration: 1, repeat: Infinity }}
                                             />
-                                        ))}
-                                        {/* Secondary smaller particles */}
-                                        {[...Array(16)].map((_, i) => (
-                                            <motion.div
-                                                key={`particle-small-${cycleCount}-${i}`}
-                                                className="processing-particle-small"
-                                                initial={{
-                                                    x: 0,
-                                                    y: 0,
-                                                    opacity: 0,
-                                                    scale: 0
-                                                }}
-                                                animate={{
-                                                    x: Math.cos((i * Math.PI * 2) / 16) * 60,
-                                                    y: Math.sin((i * Math.PI * 2) / 16) * 60,
-                                                    opacity: [0, 0.8, 0],
-                                                    scale: [0, 1, 0]
-                                                }}
-                                                transition={{
-                                                    duration: 1.5,
-                                                    delay: 0.3 + i * 0.05,
-                                                    ease: "easeOut"
-                                                }}
-                                            />
-                                        ))}
-                                        {/* Energy waves */}
-                                        {[...Array(3)].map((_, i) => (
-                                            <motion.div
-                                                key={`wave-${cycleCount}-${i}`}
-                                                className="energy-wave"
-                                                initial={{
-                                                    scale: 0,
-                                                    opacity: 0
-                                                }}
-                                                animate={{
-                                                    scale: [0, 2.5, 3],
-                                                    opacity: [0, 0.6, 0]
-                                                }}
-                                                transition={{
-                                                    duration: 2,
-                                                    delay: i * 0.4,
-                                                    ease: "easeOut"
-                                                }}
-                                            />
-                                        ))}
-                                    </>
+                                        )}
+                                    </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
 
-                        {/* Output Slot */}
-                        <div className="output-slot">
-                            <div className="slot-label">Output</div>
-                            <div className="slot-opening">
+                        {/* Processing Stations */}
+                        <div className="processing-stations">
+                            {/* Station 1: Scanner */}
+                            <motion.div
+                                className={`station scanner-station ${processingStage === 2 ? 'active' : ''}`}
+                                style={{ left: '25%' }}
+                            >
+                                <div className="station-body">
+                                    <div className="station-icon">🔍</div>
+                                    <div className="station-label">SCAN</div>
+
+                                    {/* Laser Scanner Beam */}
+                                    <AnimatePresence>
+                                        {processingStage === 2 && (
+                                            <motion.div
+                                                className="laser-beam"
+                                                initial={{ scaleY: 0, opacity: 0 }}
+                                                animate={{
+                                                    scaleY: [0, 1, 1, 0],
+                                                    opacity: [0, 1, 1, 0],
+                                                    y: [0, 60, 60, 0]
+                                                }}
+                                                exit={{ opacity: 0 }}
+                                                transition={{ duration: 1.5, repeat: 2 }}
+                                            />
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Robotic Arm */}
                                 <motion.div
-                                    className="slot-light success"
+                                    className="robotic-arm"
                                     animate={{
-                                        opacity: [0.3, 1, 0.3],
-                                        scale: [1, 1.2, 1]
+                                        rotate: processingStage === 2 ? [-5, 5, -5] : 0
+                                    }}
+                                    transition={{ duration: 0.5, repeat: processingStage === 2 ? Infinity : 0 }}
+                                >
+                                    <div className="arm-segment"></div>
+                                    <div className="arm-joint"></div>
+                                </motion.div>
+                            </motion.div>
+
+                            {/* Station 2: AI Processor */}
+                            <motion.div
+                                className={`station ai-station ${processingStage === 3 ? 'active' : ''}`}
+                                style={{ left: '50%' }}
+                            >
+                                <div className="station-body">
+                                    <div className="station-icon">🤖</div>
+                                    <div className="station-label">AI PROCESS</div>
+
+                                    {/* Neural Network Animation */}
+                                    <div className="neural-network">
+                                        {[...Array(6)].map((_, i) => (
+                                            <motion.div
+                                                key={`neuron-${i}`}
+                                                className="neuron"
+                                                style={{
+                                                    left: `${(i % 3) * 40 + 10}%`,
+                                                    top: `${Math.floor(i / 3) * 50 + 20}%`
+                                                }}
+                                                animate={{
+                                                    scale: processingStage === 3 ? [1, 1.3, 1] : 1,
+                                                    opacity: processingStage === 3 ? [0.5, 1, 0.5] : 0.5
+                                                }}
+                                                transition={{
+                                                    duration: 0.8,
+                                                    delay: i * 0.1,
+                                                    repeat: processingStage === 3 ? Infinity : 0
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    {/* Data Particles */}
+                                    <AnimatePresence>
+                                        {processingStage === 3 && (
+                                            <>
+                                                {[...Array(8)].map((_, i) => (
+                                                    <motion.div
+                                                        key={`ai-particle-${cycleCount}-${i}`}
+                                                        className="ai-particle"
+                                                        initial={{
+                                                            x: 0,
+                                                            y: 0,
+                                                            opacity: 0
+                                                        }}
+                                                        animate={{
+                                                            x: Math.cos((i * Math.PI * 2) / 8) * 40,
+                                                            y: Math.sin((i * Math.PI * 2) / 8) * 40,
+                                                            opacity: [0, 1, 0]
+                                                        }}
+                                                        transition={{
+                                                            duration: 1.5,
+                                                            delay: i * 0.1,
+                                                            repeat: Infinity
+                                                        }}
+                                                    />
+                                                ))}
+                                            </>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </motion.div>
+
+                            {/* Station 3: Enhancer */}
+                            <motion.div
+                                className={`station enhancer-station ${processingStage === 4 ? 'active' : ''}`}
+                                style={{ left: '75%' }}
+                            >
+                                <div className="station-body">
+                                    <div className="station-icon">✨</div>
+                                    <div className="station-label">ENHANCE</div>
+
+                                    {/* Enhancement Rays */}
+                                    <AnimatePresence>
+                                        {processingStage === 4 && (
+                                            <>
+                                                {[...Array(5)].map((_, i) => (
+                                                    <motion.div
+                                                        key={`ray-${cycleCount}-${i}`}
+                                                        className="enhancement-ray"
+                                                        style={{
+                                                            left: `${i * 20}%`,
+                                                            animationDelay: `${i * 0.1}s`
+                                                        }}
+                                                        initial={{ scaleY: 0, opacity: 0 }}
+                                                        animate={{
+                                                            scaleY: [0, 1, 0],
+                                                            opacity: [0, 1, 0]
+                                                        }}
+                                                        exit={{ opacity: 0 }}
+                                                        transition={{
+                                                            duration: 1,
+                                                            delay: i * 0.1,
+                                                            repeat: Infinity,
+                                                            repeatDelay: 0.5
+                                                        }}
+                                                    />
+                                                ))}
+                                            </>
+                                        )}
+                                    </AnimatePresence>
+
+                                    {/* Sparkle Effects */}
+                                    <AnimatePresence>
+                                        {processingStage === 4 && (
+                                            <>
+                                                {[...Array(6)].map((_, i) => (
+                                                    <motion.div
+                                                        key={`sparkle-${cycleCount}-${i}`}
+                                                        className="station-sparkle"
+                                                        style={{
+                                                            left: `${Math.random() * 80 + 10}%`,
+                                                            top: `${Math.random() * 60 + 20}%`
+                                                        }}
+                                                        initial={{ scale: 0, opacity: 0, rotate: 0 }}
+                                                        animate={{
+                                                            scale: [0, 1, 0],
+                                                            opacity: [0, 1, 0],
+                                                            rotate: [0, 180]
+                                                        }}
+                                                        transition={{
+                                                            duration: 1,
+                                                            delay: i * 0.15,
+                                                            repeat: Infinity,
+                                                            repeatDelay: 0.5
+                                                        }}
+                                                    >
+                                                        ✨
+                                                    </motion.div>
+                                                ))}
+                                            </>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Mechanical Piston */}
+                                <motion.div
+                                    className="piston"
+                                    animate={{
+                                        y: processingStage === 4 ? [0, 15, 0] : 0
                                     }}
                                     transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        ease: "easeInOut",
-                                        delay: 0.5
+                                        duration: 0.6,
+                                        repeat: processingStage === 4 ? Infinity : 0
                                     }}
-                                />
+                                >
+                                    <div className="piston-rod"></div>
+                                    <div className="piston-head"></div>
+                                </motion.div>
+                            </motion.div>
+                        </div>
+
+                        {/* Gears Decoration */}
+                        <div className="gears-container">
+                            <motion.div
+                                className="gear gear-1"
+                                animate={{ rotate: isProcessing ? 360 : 0 }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                            >
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                            </motion.div>
+                            <motion.div
+                                className="gear gear-2"
+                                animate={{ rotate: isProcessing ? -360 : 0 }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                            >
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                                <div className="gear-tooth"></div>
+                            </motion.div>
+                        </div>
+
+                        {/* Status Display */}
+                        <div className="status-display">
+                            <div className="display-screen">
+                                <div className="screen-header">SYSTEM STATUS</div>
+                                <div className="screen-content">
+                                    <motion.div
+                                        className="status-line"
+                                        animate={{
+                                            color: isProcessing ? '#10b981' : '#64748b'
+                                        }}
+                                    >
+                                        ● {processingStage === 0 ? 'READY' :
+                                           processingStage === 1 ? 'LOADING...' :
+                                           processingStage === 2 ? 'SCANNING...' :
+                                           processingStage === 3 ? 'PROCESSING...' :
+                                           processingStage === 4 ? 'ENHANCING...' :
+                                           'COMPLETE'}
+                                    </motion.div>
+                                    <div className="progress-bar">
+                                        <motion.div
+                                            className="progress-fill"
+                                            animate={{
+                                                width: `${resumePosition}%`
+                                            }}
+                                            transition={{ duration: 0.3 }}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        {/* Status Indicators */}
-                        <div className="status-indicators">
-                            <motion.div
-                                className="status-dot"
-                                animate={{
-                                    backgroundColor: ["#10b981", "#06b6d4", "#10b981"]
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut"
-                                }}
-                            />
-                            <motion.div
-                                className="status-dot"
-                                animate={{
-                                    backgroundColor: ["#06b6d4", "#10b981", "#06b6d4"]
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                    delay: 0.3
-                                }}
-                            />
-                            <motion.div
-                                className="status-dot"
-                                animate={{
-                                    backgroundColor: ["#10b981", "#06b6d4", "#10b981"]
-                                }}
-                                transition={{
-                                    duration: 2,
-                                    repeat: Infinity,
-                                    ease: "easeInOut",
-                                    delay: 0.6
-                                }}
-                            />
-                        </div>
                     </div>
-
-                    {/* Animated Resume Documents */}
-                    <AnimatePresence>
-                        {isProcessing && (
-                            <>
-                                {/* Input Resume */}
-                                <motion.div
-                                    key={`input-${cycleCount}`}
-                                    className="resume-document input-resume"
-                                    initial={{ x: -100, y: 0, opacity: 0, rotate: -10, scale: 0.8 }}
-                                    animate={{
-                                        x: [-100, -50, 0],
-                                        y: 0,
-                                        opacity: [0, 1, 1],
-                                        rotate: [-10, -3, 0],
-                                        scale: [0.8, 1.02, 1]
-                                    }}
-                                    exit={{ opacity: 0, scale: 0.5, rotate: -5 }}
-                                    transition={{
-                                        duration: 1.2,
-                                        ease: [0.4, 0, 0.2, 1]
-                                    }}
-                                >
-                                    <motion.div
-                                        className="document-glow-effect"
-                                        animate={{
-                                            opacity: [0, 0.5, 0],
-                                            scale: [0.9, 1.1, 0.9]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    <div className="document-header">
-                                        <div className="doc-icon">📄</div>
-                                        <div className="doc-title">Original Resume</div>
-                                    </div>
-                                    <div className="document-content">
-                                        <motion.div
-                                            className="doc-line"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 0.5, delay: 0.3 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line short"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "60%" }}
-                                            transition={{ duration: 0.5, delay: 0.4 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 0.5, delay: 0.5 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line medium"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "80%" }}
-                                            transition={{ duration: 0.5, delay: 0.6 }}
-                                        />
-                                    </div>
-                                    <div className="quality-badge basic">Basic</div>
-                                </motion.div>
-
-                                {/* Output Resume */}
-                                <motion.div
-                                    key={`output-${cycleCount}`}
-                                    className="resume-document output-resume"
-                                    initial={{ x: 0, y: 0, opacity: 0, rotate: 0, scale: 0.8 }}
-                                    animate={{
-                                        x: [0, 50, 100],
-                                        y: 0,
-                                        opacity: [0, 1, 1],
-                                        rotate: [0, 3, 6],
-                                        scale: [0.8, 1.02, 1]
-                                    }}
-                                    transition={{
-                                        duration: 1.2,
-                                        delay: 2.5,
-                                        ease: [0.4, 0, 0.2, 1]
-                                    }}
-                                >
-                                    <motion.div
-                                        className="document-glow-effect enhanced"
-                                        animate={{
-                                            opacity: [0, 0.8, 0],
-                                            scale: [0.9, 1.2, 0.9]
-                                        }}
-                                        transition={{
-                                            duration: 2,
-                                            repeat: Infinity,
-                                            ease: "easeInOut"
-                                        }}
-                                    />
-                                    <div className="document-header enhanced">
-                                        <div className="doc-icon">✨</div>
-                                        <div className="doc-title">Enhanced Resume</div>
-                                    </div>
-                                    <div className="document-content">
-                                        <motion.div
-                                            className="doc-line enhanced"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 0.5, delay: 2.8 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line enhanced short"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "60%" }}
-                                            transition={{ duration: 0.5, delay: 2.9 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line enhanced"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "100%" }}
-                                            transition={{ duration: 0.5, delay: 3.0 }}
-                                        />
-                                        <motion.div
-                                            className="doc-line enhanced medium"
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "80%" }}
-                                            transition={{ duration: 0.5, delay: 3.1 }}
-                                        />
-                                    </div>
-                                    <div className="quality-badge premium">
-                                        <span className="badge-icon">⭐</span>
-                                        Premium
-                                    </div>
-                                    {/* Multiple sparkle effects */}
-                                    <motion.div
-                                        className="sparkle-effect"
-                                        initial={{ opacity: 0, scale: 0 }}
-                                        animate={{ opacity: [0, 1, 0], scale: [0, 1.5, 2] }}
-                                        transition={{ duration: 1, delay: 2.5 }}
-                                    />
-                                    <motion.div
-                                        className="sparkle-effect sparkle-2"
-                                        initial={{ opacity: 0, scale: 0 }}
-                                        animate={{ opacity: [0, 1, 0], scale: [0, 1.8, 2.5] }}
-                                        transition={{ duration: 1.2, delay: 2.7 }}
-                                    />
-                                    <motion.div
-                                        className="sparkle-effect sparkle-3"
-                                        initial={{ opacity: 0, scale: 0 }}
-                                        animate={{ opacity: [0, 1, 0], scale: [0, 1.3, 2] }}
-                                        transition={{ duration: 1, delay: 2.9 }}
-                                    />
-                                    {/* Success checkmarks */}
-                                    {[...Array(4)].map((_, i) => (
-                                        <motion.div
-                                            key={`check-${i}`}
-                                            className="success-check"
-                                            style={{ top: `${35 + i * 25}%`, right: '10px' }}
-                                            initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                            transition={{ duration: 0.4, delay: 2.8 + i * 0.1 }}
-                                        >
-                                            ✓
-                                        </motion.div>
-                                    ))}
-                                </motion.div>
-                            </>
-                        )}
-                    </AnimatePresence>
 
                     {/* Feature Tags */}
                     <div className="feature-tags">
                         <motion.div
                             className="feature-tag"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.4, duration: 0.5 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <span className="tag-icon">🎯</span>
-                            ATS Optimized
+                            <span className="tag-icon">⚙️</span>
+                            Automated Process
                         </motion.div>
                         <motion.div
                             className="feature-tag"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.5, duration: 0.5 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <span className="tag-icon">🚀</span>
-                            AI Enhanced
+                            <span className="tag-icon">🤖</span>
+                            AI-Powered
                         </motion.div>
                         <motion.div
                             className="feature-tag"
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.6, duration: 0.5 }}
+                            whileHover={{ scale: 1.05, y: -2 }}
                         >
                             <span className="tag-icon">⚡</span>
-                            Instant Results
+                            Lightning Fast
                         </motion.div>
                     </div>
                 </motion.div>
@@ -942,7 +471,7 @@ const ResumeMachine = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.3 }}
                             >
-                                {isProcessing ? '3s' : '&lt;5s'}
+                                {isProcessing ? '8s' : '<10s'}
                             </motion.span>
                         </div>
                         <div className="stat-label">Processing Time</div>
