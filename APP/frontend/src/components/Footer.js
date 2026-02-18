@@ -1,4 +1,5 @@
 import React from 'react';
+import Logo from './Logo';
 import '../styles/Footer.css';
 
 const Footer = () => {
@@ -7,13 +8,7 @@ const Footer = () => {
             <div className="footer-container">
                 <div className="footer-grid">
                     <div className="footer-brand" id="about">
-                        <div className="footer-logo">
-                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                                <rect width="32" height="32" rx="6" fill="#10b981"/>
-                                <path d="M12 20V12M16 20V8M20 20V16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                            <span className="footer-logo-text">HIRELYTIC</span>
-                        </div>
+                        <Logo className="mb-4" />
                         <p className="footer-tagline">
                             AI-powered resume intelligence for modern professionals.
                             Optimize your career journey with confidence.

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, Github, Chrome, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 import AnimatedGradientBackground from '../components/AnimatedGradientBackground';
 import '../styles/Auth.css';
 
@@ -133,12 +134,7 @@ const Login = () => {
 
                 <div className="auth-card">
                     <motion.div className="auth-header" variants={itemVariants}>
-                        <div className="auth-logo">
-                            <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
-                                <rect width="32" height="32" rx="6" fill="#10b981"/>
-                                <path d="M12 20V12M16 20V8M20 20V16" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-                            </svg>
-                        </div>
+                        <Logo className="mb-4 justify-center" />
                         <h1 className="auth-title">Welcome Back</h1>
                         <p className="auth-subtitle">Sign in to continue to Hirelytic</p>
                     </motion.div>

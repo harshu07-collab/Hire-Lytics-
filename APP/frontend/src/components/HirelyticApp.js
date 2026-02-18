@@ -26,19 +26,7 @@ const HirelyticApp = ({ backendStatus }) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
-            <Navbar />
-            {backendStatus === 'offline' && (
-                <div style={{
-                    background: '#fee2e2',
-                    color: '#991b1b',
-                    padding: '0.5rem',
-                    textAlign: 'center',
-                    fontSize: '0.875rem',
-                    fontWeight: '500'
-                }}>
-                    ⚠️ Backend server is offline. Some features may not work as expected.
-                </div>
-            )}
+            <Navbar backendStatus={backendStatus} />
             <Hero />
             <ResumeMachine />
             <ResumeAnalyzer backendStatus={backendStatus} />

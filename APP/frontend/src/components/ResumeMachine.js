@@ -1,60 +1,128 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import '../styles/ResumeMachine.css';
 
 const ResumeMachine = () => {
+    const [parallaxOffset, setParallaxOffset] = useState(0);
     const [isProcessing, setIsProcessing] = useState(false);
     const [cycleCount, setCycleCount] = useState(0);
     const [processingStage, setProcessingStage] = useState(0);
-    const [resumePosition, setResumePosition] = useState(0); // 0-100% along conveyor
+    const resumeControls = useAnimation();
+    const progressControls = useAnimation();
+    const timersRef = useRef([]);
+    const sparklePositions = [
+        { left: '16%', top: '28%' },
+        { left: '62%', top: '22%' },
+        { left: '34%', top: '62%' },
+        { left: '74%', top: '58%' },
+        { left: '46%', top: '34%' },
+        { left: '24%', top: '48%' }
+    ];
+
+    const clearTimers = () => {
+        timersRef.current.forEach((timer) => clearTimeout(timer));
+        timersRef.current = [];
+    };
 
     useEffect(() => {
-        // Auto-start animation cycle
-        const interval = setInterval(() => {
+        let isMounted = true;
+
+        const cycleDuration = 10; // seconds
+        const stageTimings = [
+            { stage: 1, time: 0.6 },
+            { stage: 2, time: 2.0 },
+            { stage: 3, time: 4.0 },
+            { stage: 4, time: 6.4 },
+            { stage: 5, time: 8.6 }
+        ];
+
+        const runCycle = async () => {
+            if (!isMounted) {
+                return;
+            }
+
+            clearTimers();
             setIsProcessing(true);
-            setCycleCount(prev => prev + 1);
+            setCycleCount((prev) => prev + 1);
+            setProcessingStage(1);
+
+            stageTimings.forEach(({ stage, time }) => {
+                const timer = setTimeout(() => {
+                    if (isMounted) {
+                        setProcessingStage(stage);
+                    }
+                }, time * 1000);
+                timersRef.current.push(timer);
+            });
+
+            const resumeAnimation = resumeControls.start({
+                x: ['-120%', '5%', '30%', '55%', '80%', '110%'],
+                opacity: [0, 1, 1, 1, 1, 0],
+                transition: {
+                    duration: cycleDuration,
+                    times: [0, 0.08, 0.32, 0.55, 0.82, 1],
+                    ease: 'linear'
+                }
+            });
+
+            const progressAnimation = progressControls.start({
+                width: ['0%', '8%', '32%', '55%', '82%', '100%'],
+                transition: {
+                    duration: cycleDuration,
+                    times: [0, 0.08, 0.32, 0.55, 0.82, 1],
+                    ease: 'linear'
+                }
+            });
+
+            await Promise.all([resumeAnimation, progressAnimation]);
+
+            if (!isMounted) {
+                return;
+            }
+
+            setIsProcessing(false);
             setProcessingStage(0);
-            setResumePosition(0);
 
-            // Stage 1: Resume enters conveyor (0-25%)
-            setTimeout(() => {
-                setProcessingStage(1);
-                setResumePosition(25);
-            }, 500);
+            const restartTimer = setTimeout(() => {
+                if (isMounted) {
+                    runCycle();
+                }
+            }, 1500);
+            timersRef.current.push(restartTimer);
+        };
 
-            // Stage 2: Scanning station (25-40%)
-            setTimeout(() => {
-                setProcessingStage(2);
-                setResumePosition(40);
-            }, 2000);
+        runCycle();
 
-            // Stage 3: AI Processing station (40-60%)
-            setTimeout(() => {
-                setProcessingStage(3);
-                setResumePosition(60);
-            }, 4000);
+        return () => {
+            isMounted = false;
+            clearTimers();
+        };
+    }, [resumeControls, progressControls]);
 
-            // Stage 4: Enhancement station (60-80%)
-            setTimeout(() => {
-                setProcessingStage(4);
-                setResumePosition(80);
-            }, 6000);
+    useEffect(() => {
+        let frame = null;
 
-            // Stage 5: Exit conveyor (80-100%)
-            setTimeout(() => {
-                setProcessingStage(5);
-                setResumePosition(100);
-            }, 8000);
+        const handleScroll = () => {
+            if (frame) {
+                return;
+            }
+            frame = requestAnimationFrame(() => {
+                const scrollTop = window.scrollY || window.pageYOffset || 0;
+                const offset = Math.max(-20, Math.min(20, scrollTop * 0.04));
+                setParallaxOffset(offset);
+                frame = null;
+            });
+        };
 
-            // Reset after animation completes
-            setTimeout(() => {
-                setIsProcessing(false);
-                setProcessingStage(0);
-                setResumePosition(0);
-            }, 10000);
-        }, 12000); // Cycle every 12 seconds
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll();
 
-        return () => clearInterval(interval);
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (frame) {
+                cancelAnimationFrame(frame);
+            }
+        };
     }, []);
 
     return (
@@ -79,7 +147,14 @@ const ResumeMachine = () => {
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ delay: 0.2, duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                    style={{ '--parallax-offset': `${parallaxOffset}px` }}
                 >
+                    <div className="ambient-layer">
+                        <div className="ambient-sweep"></div>
+                        <div className="ambient-glow ambient-glow-left"></div>
+                        <div className="ambient-glow ambient-glow-right"></div>
+                        <div className="ambient-dots"></div>
+                    </div>
                     {/* Main Conveyor Belt */}
                     <div className="conveyor-belt-wrapper">
                         {/* Conveyor Belt Track */}
@@ -91,11 +166,12 @@ const ResumeMachine = () => {
                                     backgroundPosition: isProcessing ? ['0% 0%', '100% 0%'] : '0% 0%'
                                 }}
                                 transition={{
-                                    duration: 2,
+                                    duration: 1.2,
                                     repeat: Infinity,
                                     ease: "linear"
                                 }}
                             />
+                            <div className="belt-scanlight" aria-hidden="true"></div>
 
                             {/* Belt Rollers */}
                             <motion.div
@@ -120,21 +196,16 @@ const ResumeMachine = () => {
                                         key={`resume-${cycleCount}`}
                                         className="resume-on-belt"
                                         initial={{ x: '-120%', opacity: 0 }}
-                                        animate={{
-                                            x: `${resumePosition}%`,
-                                            opacity: resumePosition < 100 ? 1 : 0
-                                        }}
+                                        animate={resumeControls}
                                         exit={{ x: '120%', opacity: 0 }}
-                                        transition={{
-                                            x: { duration: 8, ease: "linear" },
-                                            opacity: { duration: 0.5 }
-                                        }}
                                     >
-                                        <div className="document-icon">📄</div>
-                                        <div className="document-lines">
-                                            <div className="doc-line"></div>
-                                            <div className="doc-line short"></div>
-                                            <div className="doc-line"></div>
+                                        <div className="document-icon" aria-hidden="true">
+                                            <div className="document-page" />
+                                            <div className="document-lines">
+                                                <div className="doc-line"></div>
+                                                <div className="doc-line short"></div>
+                                                <div className="doc-line"></div>
+                                            </div>
                                         </div>
 
                                         {/* Enhancement Glow Effect */}
@@ -159,7 +230,7 @@ const ResumeMachine = () => {
                                 style={{ left: '25%' }}
                             >
                                 <div className="station-body">
-                                    <div className="station-icon">🔍</div>
+                                    <div className="station-icon station-icon-scan" aria-hidden="true"></div>
                                     <div className="station-label">SCAN</div>
 
                                     {/* Laser Scanner Beam */}
@@ -199,7 +270,7 @@ const ResumeMachine = () => {
                                 style={{ left: '50%' }}
                             >
                                 <div className="station-body">
-                                    <div className="station-icon">🤖</div>
+                                    <div className="station-icon station-icon-ai" aria-hidden="true"></div>
                                     <div className="station-label">AI PROCESS</div>
 
                                     {/* Neural Network Animation */}
@@ -262,7 +333,7 @@ const ResumeMachine = () => {
                                 style={{ left: '75%' }}
                             >
                                 <div className="station-body">
-                                    <div className="station-icon">✨</div>
+                                    <div className="station-icon station-icon-enhance" aria-hidden="true"></div>
                                     <div className="station-label">ENHANCE</div>
 
                                     {/* Enhancement Rays */}
@@ -304,8 +375,8 @@ const ResumeMachine = () => {
                                                         key={`sparkle-${cycleCount}-${i}`}
                                                         className="station-sparkle"
                                                         style={{
-                                                            left: `${Math.random() * 80 + 10}%`,
-                                                            top: `${Math.random() * 60 + 20}%`
+                                                            left: sparklePositions[i % sparklePositions.length].left,
+                                                            top: sparklePositions[i % sparklePositions.length].top
                                                         }}
                                                         initial={{ scale: 0, opacity: 0, rotate: 0 }}
                                                         animate={{
@@ -320,7 +391,7 @@ const ResumeMachine = () => {
                                                             repeatDelay: 0.5
                                                         }}
                                                     >
-                                                        ✨
+                                                        <span className="sparkle-core" />
                                                     </motion.div>
                                                 ))}
                                             </>
@@ -382,7 +453,8 @@ const ResumeMachine = () => {
                                             color: isProcessing ? '#10b981' : '#64748b'
                                         }}
                                     >
-                                        ● {processingStage === 0 ? 'READY' :
+                                        <span className="status-dot" aria-hidden="true" />
+                                        {processingStage === 0 ? 'READY' :
                                            processingStage === 1 ? 'LOADING...' :
                                            processingStage === 2 ? 'SCANNING...' :
                                            processingStage === 3 ? 'PROCESSING...' :
@@ -392,10 +464,7 @@ const ResumeMachine = () => {
                                     <div className="progress-bar">
                                         <motion.div
                                             className="progress-fill"
-                                            animate={{
-                                                width: `${resumePosition}%`
-                                            }}
-                                            transition={{ duration: 0.3 }}
+                                            animate={progressControls}
                                         />
                                     </div>
                                 </div>
@@ -413,7 +482,7 @@ const ResumeMachine = () => {
                             transition={{ delay: 0.4, duration: 0.5 }}
                             whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <span className="tag-icon">⚙️</span>
+                            <span className="tag-icon tag-icon-automation" aria-hidden="true"></span>
                             Automated Process
                         </motion.div>
                         <motion.div
@@ -424,7 +493,7 @@ const ResumeMachine = () => {
                             transition={{ delay: 0.5, duration: 0.5 }}
                             whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <span className="tag-icon">🤖</span>
+                            <span className="tag-icon tag-icon-ai" aria-hidden="true"></span>
                             AI-Powered
                         </motion.div>
                         <motion.div
@@ -435,7 +504,7 @@ const ResumeMachine = () => {
                             transition={{ delay: 0.6, duration: 0.5 }}
                             whileHover={{ scale: 1.05, y: -2 }}
                         >
-                            <span className="tag-icon">⚡</span>
+                            <span className="tag-icon tag-icon-speed" aria-hidden="true"></span>
                             Lightning Fast
                         </motion.div>
                     </div>
