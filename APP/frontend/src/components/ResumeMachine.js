@@ -217,6 +217,14 @@ const ResumeMachine = () => {
                                                 transition={{ duration: 1, repeat: Infinity }}
                                             />
                                         )}
+                                        {processingStage >= 4 && (
+                                            <motion.div
+                                                className="enhancement-halo"
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: [0.2, 0.8, 0.2], scale: [0.9, 1.08, 0.9] }}
+                                                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                                            />
+                                        )}
                                     </motion.div>
                                 )}
                             </AnimatePresence>

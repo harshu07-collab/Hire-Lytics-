@@ -8,6 +8,7 @@ import HirelyticApp from './components/HirelyticApp';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResumeTemplates from './pages/ResumeTemplates';
+import ResumeAnalysis from './pages/ResumeAnalysis';
 
 function App() {
     const [showIntro, setShowIntro] = useState(true);
@@ -59,6 +60,7 @@ function App() {
                         <Route path="/login" element={<Login />} />
                         <Route path="/signup" element={<Signup />} />
                         <Route path="/templates" element={<ResumeTemplates backendStatus={backendStatus} />} />
+                        <Route path="/analysis" element={<ResumeAnalysis backendStatus={backendStatus} />} />
                         <Route path="/" element={
                             showIntro && !hasSeenIntro ? (
                                 <GoogleSearchIntro onComplete={handleIntroComplete} />

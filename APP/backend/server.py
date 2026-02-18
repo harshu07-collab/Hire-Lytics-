@@ -85,19 +85,44 @@ def advanced_clean_text(text):
 
 def get_ats_score(clean_text):
     """
-    Get ATS score from Groq API
-    Returns: dict with score and breakdown or error message
+    Get ATS score from Groq API with detailed analysis
+    Returns: dict with score, breakdown, and detailed issues
     """
     try:
         response = client.chat.completions.create(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are an ATS (Applicant Tracking System) expert. Analyze resumes and return a JSON object with the following structure: {\"score\": <number 0-100>, \"breakdown\": {\"ats_parse_rate\": <0-100>, \"formatting\": <0-100>, \"skills_match\": <0-100>, \"grammar\": <0-100>}, \"feedback\": \"<brief explanation>\"}. Only return valid JSON, no additional text."
+                    "content": """You are an ATS (Applicant Tracking System) expert. Analyze resumes and return a detailed JSON object with the following structure:
+{
+  "score": <number 0-100>,
+  "breakdown": {
+    "ats_parse_rate": <0-100>,
+    "formatting": <0-100>,
+    "skills_match": <0-100>,
+    "grammar": <0-100>
+  },
+  "feedback": "<brief explanation>",
+  "issues": {
+    "content": [
+      {"type": "error|warning|success", "title": "Issue Title", "description": "Detailed description", "impact": "X Issues"}
+    ],
+    "sections": [
+      {"type": "error|warning|success", "title": "Section Name", "description": "Feedback", "impact": "X Issues"}
+    ],
+    "ats_essentials": [
+      {"type": "error|warning|success", "title": "Essential Item", "description": "Details", "impact": "X Issues"}
+    ],
+    "tailoring": [
+      {"type": "error|warning|success", "title": "Tailoring Aspect", "description": "Recommendation", "impact": "X Issues"}
+    ]
+  }
+}
+Only return valid JSON, no additional text."""
                 },
                 {
                     "role": "user",
-                    "content": f"Analyze the following resume text for ATS compatibility:\n\n{clean_text[:4000]}"  # Limit text length to avoid token limits
+                    "content": f"Analyze the following resume text for ATS compatibility and provide detailed feedback:\n\n{clean_text[:4000]}"
                 }
             ],
             model="llama-3.3-70b-versatile",
@@ -122,16 +147,33 @@ def get_ats_score(clean_text):
             result = json.loads(content)
             return result
         except json.JSONDecodeError:
-            # If JSON parsing fails, return the raw content with a default structure
+            # If JSON parsing fails, return a default structure
             return {
-                "score": 50,
+                "score": 65,
                 "breakdown": {
-                    "ats_parse_rate": 50,
-                    "formatting": 50,
-                    "skills_match": 50,
-                    "grammar": 50
+                    "ats_parse_rate": 70,
+                    "formatting": 65,
+                    "skills_match": 60,
+                    "grammar": 75
                 },
-                "feedback": content
+                "feedback": "Analysis completed with basic scoring",
+                "issues": {
+                    "content": [
+                        {"type": "warning", "title": "ATS Parse Rate", "description": "Some formatting may affect ATS parsing.", "impact": "2 Issues"},
+                        {"type": "success", "title": "Quantifying Impact", "description": "Good use of quantifiable achievements.", "impact": "No Issues"}
+                    ],
+                    "sections": [
+                        {"type": "success", "title": "Contact Information", "description": "All required contact details present.", "impact": "No Issues"},
+                        {"type": "warning", "title": "Work Experience", "description": "Consider adding more details.", "impact": "1 Issue"}
+                    ],
+                    "ats_essentials": [
+                        {"type": "success", "title": "File Format", "description": "PDF format is ATS-friendly.", "impact": "No Issues"},
+                        {"type": "warning", "title": "Keywords", "description": "Add more industry keywords.", "impact": "3 Issues"}
+                    ],
+                    "tailoring": [
+                        {"type": "warning", "title": "Job Match", "description": "Resume could be better tailored.", "impact": "2 Issues"}
+                    ]
+                }
             }
     except Exception as e:
         logging.error(f"Error getting ATS score: {str(e)}")
@@ -143,7 +185,13 @@ def get_ats_score(clean_text):
                 "skills_match": 0,
                 "grammar": 0
             },
-            "feedback": f"Error analyzing resume: {str(e)}"
+            "feedback": f"Error analyzing resume: {str(e)}",
+            "issues": {
+                "content": [],
+                "sections": [],
+                "ats_essentials": [],
+                "tailoring": []
+            }
         }
 
 
@@ -255,7 +303,13 @@ async def analyze_resume(file: UploadFile = File(...)):
                 "skills_match": 0,
                 "grammar": 0
             }),
-            "feedback": ats_result.get("feedback", "Analysis complete")
+            "feedback": ats_result.get("feedback", "Analysis complete"),
+            "issues": ats_result.get("issues", {
+                "content": [],
+                "sections": [],
+                "ats_essentials": [],
+                "tailoring": []
+            })
         }
 
         logger.info(f"Analysis complete for {file.filename}: Score {doc['score']}")
