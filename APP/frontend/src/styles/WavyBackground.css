@@ -54,19 +54,20 @@
     stop-opacity: 0.4;
 }
 
+/* Enhanced Light Mode Visibility */
 .wavy-background-container.light .stop-start {
-    stop-color: #10b981; /* Emerald Green */
-    stop-opacity: 0.5;
+    stop-color: #10b981; /* Vibrant Emerald */
+    stop-opacity: 0.8;
 }
 
 .wavy-background-container.light .stop-middle {
-    stop-color: #8b5cf6;
-    stop-opacity: 0.3;
+    stop-color: #6366f1; /* Indigo */
+    stop-opacity: 0.6;
 }
 
 .wavy-background-container.light .stop-end {
-    stop-color: #a78bfa;
-    stop-opacity: 0.2;
+    stop-color: #8b5cf6; /* Vibrant Purple */
+    stop-opacity: 0.5;
 }
 
 @keyframes premiumWaveMove {
@@ -76,15 +77,15 @@
         transform: translate(-50px, -20px) scale(0.98);
     }
     10% {
-        opacity: 0.4;
+        opacity: 0.6; /* Increased initial visibility */
     }
     50% {
         stroke-dashoffset: 0;
-        opacity: 0.2;
+        opacity: 0.4; /* Stronger presence in center */
         transform: translate(0, 30px) scale(1);
     }
     90% {
-        opacity: 0.4;
+        opacity: 0.6;
     }
     100% {
         stroke-dashoffset: -4000;
@@ -96,8 +97,10 @@
 /* Glow intensity based on theme */
 .wavy-background-container.dark .wavy-path {
     filter: drop-shadow(0 0 15px rgba(57, 255, 20, 0.4));
+    stroke-width: 3;
 }
 
 .wavy-background-container.light .wavy-path {
-    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.15));
+    filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.25));
+    stroke-width: 4; /* Slightly thicker in light mode for visibility */
 }

@@ -11,6 +11,7 @@ import ResumeSections from './ResumeSections';
 import AIRewrite from './AIRewrite';
 import ResumeBuilder from './ResumeBuilder';
 import Footer from './Footer';
+import WavyBackground from './WavyBackground';
 import '../styles/HirelyticApp.css';
 
 const HirelyticApp = ({ backendStatus }) => {
@@ -26,6 +27,7 @@ const HirelyticApp = ({ backendStatus }) => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
+            <WavyBackground />
             <Navbar backendStatus={backendStatus} />
             <Hero />
             <ResumeMachine />

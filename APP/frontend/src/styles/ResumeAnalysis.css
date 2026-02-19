@@ -40,7 +40,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' /%3E%3C/svg%3E");
     opacity: 0.04;
     pointer-events: none;
     z-index: 1;
@@ -138,6 +138,28 @@
     justify-content: space-between !important;
     align-items: center !important;
     margin-bottom: 24px !important;
+}
+
+.back-button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 18px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: #94a3b8 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    transform: translateX(-4px) !important;
 }
 
 .header-actions {
@@ -289,15 +311,16 @@
 }
 
 .tab-label {
-    font-size: 11px !important;
+    font-size: 12px !important;
     font-weight: 700 !important;
     color: #94a3b8 !important;
     text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
 }
 
 .tab-score {
-    font-size: 13px !important;
-    font-weight: 700 !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
 }
 
 .tab-progress-bar {
@@ -318,13 +341,16 @@
 .content-badge {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    padding: 8px 16px !important;
+    gap: 10px !important;
+    padding: 8px 20px !important;
     background: rgba(99, 102, 241, 0.15) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
     border-radius: 100px !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
     color: #818cf8 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
 }
 
 .issues-found {
@@ -346,6 +372,103 @@
     cursor: pointer !important;
 }
 
+.issue-title-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+.issue-icon {
+    flex-shrink: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.issue-title {
+    flex: 1 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #f1f5f9 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.issue-impact {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #94a3b8 !important;
+    padding: 4px 12px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 100px !important;
+    white-space: nowrap !important;
+}
+
+.expand-icon {
+    transition: transform 0.3s ease !important;
+    color: #64748b !important;
+}
+
+.expand-icon.rotated {
+    transform: rotate(180deg) !important;
+}
+
+.issue-content {
+    padding: 0 20px 24px 64px !important;
+}
+
+.issue-description {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    color: #94a3b8 !important;
+    margin: 0 0 20px 0 !important;
+}
+
+.issue-actions {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+}
+
+.btn-fix {
+    padding: 8px 20px !important;
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.btn-fix:hover {
+    background: #4f46e5 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4) !important;
+}
+
+.btn-learn {
+    padding: 8px 20px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-learn:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
 /* Right Preview Panel */
 .results-preview {
     display: flex !important;
@@ -359,6 +482,32 @@
     justify-content: space-between !important;
     align-items: center !important;
     margin-bottom: 10px !important;
+}
+
+.view-toggle {
+    display: flex !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    padding: 4px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.toggle-btn {
+    padding: 6px 16px !important;
+    border-radius: 10px !important;
+    border: none !important;
+    background: transparent !important;
+    color: #94a3b8 !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.toggle-btn.active {
+    background: #6366f1 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
 }
 
 .resume-preview-card {
@@ -389,6 +538,26 @@
     height: auto !important;
     border-radius: 4px !important;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+}
+
+.pdf-page-loading {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 500px !important;
+    width: 100% !important;
+}
+
+.loading-spinner.small {
+    width: 30px !important;
+    height: 30px !important;
+    border-width: 3px !important;
+}
+
+.pdf-preview-container .react-pdf__Page {
+    margin: 0 auto !important;
+    display: flex !important;
+    justify-content: center !important;
 }
 
 .enhanced-badge-overlay {
@@ -546,30 +715,51 @@
 
 .pdf-navigation {
     position: absolute !important;
-    bottom: 20px !important;
+    bottom: 30px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
-    padding: 8px 20px !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+    gap: 16px !important;
+    background: rgba(15, 23, 42, 0.9) !important;
+    backdrop-filter: blur(12px) !important;
+    padding: 10px 24px !important;
+    border-radius: 100px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
     z-index: 100 !important;
 }
 
 .pdf-nav-btn {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 8px !important;
-    border: 1px solid rgba(0,0,0,0.1) !important;
-    background: #ffffff !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.pdf-nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: scale(1.1) !important;
+}
+
+.pdf-nav-btn:disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+}
+
+.pdf-page-info {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #cbd5e1 !important;
+    min-width: 90px !important;
+    text-align: center !important;
 }
 
 .scanning-line {
@@ -578,8 +768,114 @@
     left: 0;
     width: 100% !important;
     height: 4px !important;
-    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent) !important;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.5) !important;
-    z-index: 40 !important;
-    animation: scanMove 4s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.8), transparent) !important;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.8) !important;
+    z-index: 45 !important;
+    animation: scanMove 3s ease-in-out infinite;
+}
+
+@keyframes scanMove {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.enhancing-overlay {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    background: rgba(10, 10, 15, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 60 !important;
+    border-radius: 20px !important;
+}
+
+.enhancing-text {
+    margin-top: 24px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #6366f1 !important;
+    letter-spacing: 0.2em !important;
+    animation: textPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes textPulse {
+    0%, 100% { opacity: 0.6; transform: scale(0.98); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+.dna-loader {
+    width: 60px;
+    height: 60px;
+    position: relative;
+}
+
+.dna-loader::before, .dna-loader::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: #6366f1;
+    opacity: 0.6;
+    animation: dnaAnim 2s ease-in-out infinite;
+}
+
+.dna-loader::after {
+    background: #10b981;
+    animation-delay: -1s;
+}
+
+@keyframes dnaAnim {
+    0%, 100% { transform: scale(0) translateX(-100%); opacity: 0; }
+    50% { transform: scale(1) translateX(0); opacity: 0.6; }
+}
+
+.enhancement-details {
+    margin-top: 24px;
+    background: rgba(16, 185, 129, 0.05);
+    border: 1px solid rgba(16, 185, 129, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.enhancement-details-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #10b981;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.enhancement-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.enhancement-item {
+    font-size: 13px;
+    color: #94a3b8;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.enhancement-item::before {
+    content: '✓';
+    color: #10b981;
+    font-weight: bold;
 }

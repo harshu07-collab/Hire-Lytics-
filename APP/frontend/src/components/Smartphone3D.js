@@ -398,15 +398,13 @@ const Smartphone3D = () => {
 
                 <OrbitControls
                     enableZoom={false}
+                    enableRotate={true}
                     enablePan={false}
-                    minDistance={3}
-                    maxDistance={8}
-                    maxPolarAngle={Math.PI / 2}
-                    autoRotate={false}
-                    enableDamping
-                    dampingFactor={0.1}
+                    minPolarAngle={Math.PI / 2.5}
+                    maxPolarAngle={Math.PI / 1.5}
                 />
             </Canvas>
+            <div className="smartphone-glow"></div>
         </div>
     );
 };
