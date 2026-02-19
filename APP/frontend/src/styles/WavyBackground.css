@@ -1,0 +1,103 @@
+.wavy-background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.wavy-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.wavy-path {
+    stroke-dasharray: 4000;
+    stroke-dashoffset: 4000;
+    animation: premiumWaveMove 35s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    opacity: 0;
+    will-change: stroke-dashoffset, transform, opacity;
+}
+
+/* Staggered entry one by one */
+.wavy-path.line-1 {
+    animation-delay: 0s;
+    animation-duration: 35s;
+}
+
+.wavy-path.line-2 {
+    animation-delay: 10s;
+    animation-duration: 38s;
+}
+
+.wavy-path.line-3 {
+    animation-delay: 20s;
+    animation-duration: 40s;
+}
+
+/* Colors and Blending */
+.wavy-background-container.dark .stop-start {
+    stop-color: #39ff14; /* Neon Green */
+    stop-opacity: 0.9;
+}
+
+.wavy-background-container.dark .stop-middle {
+    stop-color: #8b5cf6; /* Purple */
+    stop-opacity: 0.6;
+}
+
+.wavy-background-container.dark .stop-end {
+    stop-color: #bc13fe; /* Light Purple */
+    stop-opacity: 0.4;
+}
+
+.wavy-background-container.light .stop-start {
+    stop-color: #10b981; /* Emerald Green */
+    stop-opacity: 0.5;
+}
+
+.wavy-background-container.light .stop-middle {
+    stop-color: #8b5cf6;
+    stop-opacity: 0.3;
+}
+
+.wavy-background-container.light .stop-end {
+    stop-color: #a78bfa;
+    stop-opacity: 0.2;
+}
+
+@keyframes premiumWaveMove {
+    0% {
+        stroke-dashoffset: 4000;
+        opacity: 0;
+        transform: translate(-50px, -20px) scale(0.98);
+    }
+    10% {
+        opacity: 0.4;
+    }
+    50% {
+        stroke-dashoffset: 0;
+        opacity: 0.2;
+        transform: translate(0, 30px) scale(1);
+    }
+    90% {
+        opacity: 0.4;
+    }
+    100% {
+        stroke-dashoffset: -4000;
+        opacity: 0;
+        transform: translate(50px, 20px) scale(1.02);
+    }
+}
+
+/* Glow intensity based on theme */
+.wavy-background-container.dark .wavy-path {
+    filter: drop-shadow(0 0 15px rgba(57, 255, 20, 0.4));
+}
+
+.wavy-background-container.light .wavy-path {
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.15));
+}
