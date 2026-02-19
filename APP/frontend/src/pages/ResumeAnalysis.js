@@ -94,10 +94,10 @@ const ResumeAnalysis = ({ backendStatus }) => {
                     score: 92,
                     filename: file.name,
                     breakdown: {
-                        ats_parse_rate: 65,
-                        formatting: 72,
-                        skills_match: 58,
-                        grammar: 85
+                        content: 65,
+                        sections: 72,
+                        ats_essentials: 58,
+                        tailoring: 85
                     },
                     issues: {
                         content: [
@@ -253,12 +253,35 @@ const ResumeAnalysis = ({ backendStatus }) => {
         );
     }, [pdfFile, pageNumber, viewMode, enhancedPdfUrl, isEnhancing]);
 
-    const tabData = {
-        content: { label: 'CONTENT', score: 58, color: '#ef4444' },
-        sections: { label: 'SECTIONS', score: 85, color: '#10b981' },
-        ats_essentials: { label: 'ATS ESSENTIALS', score: 63, color: '#f59e0b' },
-        tailoring: { label: 'TAILORING', score: 71, color: '#f59e0b' }
-    };
+    const tabData = React.useMemo(() => ({
+        content: { 
+            label: 'CONTENT', 
+            score: analysisData?.breakdown?.content || 0, 
+            color: getScoreColor(analysisData?.breakdown?.content || 0) 
+        },
+        sections: { 
+            label: 'SECTIONS', 
+            score: analysisData?.breakdown?.sections || 0, 
+            color: getScoreColor(analysisData?.breakdown?.sections || 0) 
+        },
+        ats_essentials: { 
+            label: 'ATS ESSENTIALS', 
+            score: analysisData?.breakdown?.ats_essentials || 0, 
+            color: getScoreColor(analysisData?.breakdown?.ats_essentials || 0) 
+        },
+        tailoring: { 
+            label: 'TAILORING', 
+            score: analysisData?.breakdown?.tailoring || 0, 
+            color: getScoreColor(analysisData?.breakdown?.tailoring || 0) 
+        }
+    }), [analysisData]);
+
+    const totalIssues = React.useMemo(() => {
+        if (!analysisData?.issues) return 0;
+        return Object.values(analysisData.issues).reduce((acc, current) => {
+            return acc + (Array.isArray(current) ? current.filter(i => i.type !== 'success').length : 0);
+        }, 0);
+    }, [analysisData]);
 
     return (
         <div className="resume-analysis-page">
@@ -581,7 +604,7 @@ const ResumeAnalysis = ({ backendStatus }) => {
                                             <span className="score-total">/100</span>
                                         </div>
                                     </div>
-                                    <div className="score-issues">{analysisData?.score >= 80 ? 'No' : '5'} issues found</div>
+                                    <div className="score-issues">{totalIssues === 0 ? 'No' : totalIssues} issues found</div>
                                 </motion.div>
 
                                 {/* Category Tabs */}
@@ -625,7 +648,9 @@ const ResumeAnalysis = ({ backendStatus }) => {
                                         </svg>
                                         {tabData[selectedTab].label}
                                     </div>
-                                    <div className="issues-found">4 issues found</div>
+                                    <div className="issues-found">
+                                        {(analysisData?.issues?.[selectedTab]?.filter(i => i.type !== 'success').length) || 0} issues found
+                                    </div>
                                 </div>
 
                                 {/* Issues List */}
