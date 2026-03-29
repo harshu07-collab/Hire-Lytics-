@@ -23,7 +23,6 @@ from auth import (
     generate_otp_secret,
     verify_otp,
     hash_password,
-    generate_temporary_password,
 )
 from email_service import send_otp_email, send_welcome_email
 from supabase_service import (

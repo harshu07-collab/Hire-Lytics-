@@ -27,7 +27,7 @@
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
+    border-radius: 16px;
     color: #4a4a6a;
     font-size: 0.875rem;
     font-weight: 600;
@@ -49,7 +49,7 @@
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border-radius: 24px;
+    border-radius: 28px;
     padding: 3rem 2.5rem;
     box-shadow:
         0 8px 32px rgba(168, 162, 255, 0.15),
@@ -69,7 +69,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 24px;
+    border-radius: 28px;
     background: linear-gradient(
         135deg,
         rgba(255, 255, 255, 0.4) 0%,
@@ -184,7 +184,7 @@
     width: 100%;
     padding: 0.875rem 1rem 0.875rem 3rem;
     border: 2px solid #e5e7eb;
-    border-radius: 12px;
+    border-radius: 16px;
     font-size: 0.9375rem;
     color: #1f2937;
     background: white;
@@ -294,7 +294,7 @@
     background-size: 200% 200%;
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 18px;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -394,6 +394,11 @@
     gap: 1rem;
 }
 
+.social-buttons-single {
+    display: flex;
+    justify-content: center;
+}
+
 .social-button {
     display: flex;
     align-items: center;
@@ -401,7 +406,7 @@
     gap: 0.625rem;
     padding: 0.875rem 1rem;
     border: 2px solid #e5e7eb;
-    border-radius: 12px;
+    border-radius: 16px;
     background: white;
     color: #374151;
     font-size: 0.9375rem;
@@ -630,11 +635,27 @@
     width: 100%;
     display: flex;
     justify-content: center;
+    align-items: center;
     padding: 1rem 0;
+    margin: 0 auto;
+    text-align: center;
 }
 
-.google-login-wrapper div {
-    width: 100%;
+.google-login-wrapper > div {
+    width: 260px !important;
+    min-width: 260px !important;
+    display: flex !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+}
+
+.google-login-wrapper iframe {
+    border-radius: 999px;
+    margin: 0 auto !important;
+}
+
+.google-login-wrapper div[role="button"] {
+    margin: 0 auto !important;
 }
 
 /* Error Banner */

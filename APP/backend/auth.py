@@ -158,22 +158,3 @@ def verify_otp(email: str, otp: str) -> bool:
 def get_otp_data(email: str) -> Optional[Dict[str, Any]]:
     """Get OTP data for email"""
     return OTP_STORE.get(email)
-
-# ============================================================
-# PASSWORD UTILITIES
-# ============================================================
-def generate_temporary_password() -> str:
-    """Generate a temporary password for OAuth users"""
-    return secrets.token_urlsafe(32)
-
-def is_strong_password(password: str) -> bool:
-    """Check if password meets minimum requirements"""
-    if len(password) < 8:
-        return False
-    if not any(c.isupper() for c in password):
-        return False
-    if not any(c.isdigit() for c in password):
-        return False
-    if not any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password):
-        return False
-    return True

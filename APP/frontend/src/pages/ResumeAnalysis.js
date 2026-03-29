@@ -18,15 +18,11 @@ const ResumeAnalysis = ({ backendStatus }) => {
     const [analysisData, setAnalysisData] = useState(null);
     const [selectedTab, setSelectedTab] = useState('content');
     const [expandedSection, setExpandedSection] = useState('ats-parse-rate');
-    const [viewMode, setViewMode] = useState('original'); // 'original' or 'enhanced'
     const [dataReady, setDataReady] = useState(false);
     const [pdfFile, setPdfFile] = useState(null);
-    const [enhancedPdfUrl, setEnhancedPdfUrl] = useState(null);
-    const [isEnhancing, setIsEnhancing] = useState(false);
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [enhancementChanges, setEnhancementChanges] = useState([]);
 
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
@@ -91,13 +87,13 @@ const ResumeAnalysis = ({ backendStatus }) => {
             // Fallback to mock data
             setTimeout(() => {
                 setAnalysisData({
-                    score: 92,
+                    score: 0,
                     filename: file.name,
                     breakdown: {
-                        content: 65,
-                        sections: 72,
-                        ats_essentials: 58,
-                        tailoring: 85
+                        content: 0,
+                        sections: 0,
+                        ats_essentials: 0,
+                        tailoring: 0
                     },
                     issues: {
                         content: [
@@ -139,77 +135,17 @@ const ResumeAnalysis = ({ backendStatus }) => {
         return 'Needs Improvement';
     };
 
-    const handleEnhance = async () => {
-        if (viewMode === 'enhanced' && enhancedPdfUrl) return;
-        
-        // Cleanup old URL if it exists
-        if (enhancedPdfUrl) {
-            URL.revokeObjectURL(enhancedPdfUrl);
-        }
-        
-        setEnhancedPdfUrl(null); // Clear previous enhancement
-        setIsEnhancing(true);
-        setViewMode('enhanced');
-        setPageNumber(1); // Reset page number
-        setNumPages(null); // Reset page count
-        
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-
-        try {
-            const response = await axios.post(`${BACKEND_URL}/api/enhance`, formData, {
-                responseType: 'json'
-            });
-            
-            if (response.data.pdf_base64) {
-                // Convert base64 to Blob
-                const byteCharacters = atob(response.data.pdf_base64);
-                const byteNumbers = new Array(byteCharacters.length);
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
-                }
-                const byteArray = new Uint8Array(byteNumbers);
-                const blob = new Blob([byteArray], { type: 'application/pdf' });
-                
-                // Create object URL for stable rendering
-                const url = URL.createObjectURL(blob);
-                setEnhancedPdfUrl(url);
-                setEnhancementChanges(response.data.changes || []);
-            } else {
-                throw new Error("No PDF data received from server");
-            }
-        } catch (error) {
-            console.error('Error enhancing resume:', error);
-            setEnhancementChanges(["Failed to enhance resume. Please check if the backend server is running and Groq API key is valid."]);
-        } finally {
-            // Ensure animation plays for at least 2 seconds
-            setTimeout(() => setIsEnhancing(false), 2000);
-        }
-    };
-
     // Cleanup on unmount
     useEffect(() => {
         return () => {
-            if (enhancedPdfUrl) {
-                URL.revokeObjectURL(enhancedPdfUrl);
-            }
+            // Cleanup any resources if necessary
         };
-    }, [enhancedPdfUrl]);
+    }, []);
 
     const pdfPreview = React.useMemo(() => {
         let fileToDisplay = pdfFile;
         let fileKey = 'original';
 
-        if (viewMode === 'enhanced') {
-            if (enhancedPdfUrl) {
-                fileToDisplay = enhancedPdfUrl;
-                fileKey = `enhanced-${enhancedPdfUrl}`;
-            } else if (isEnhancing) {
-                fileToDisplay = pdfFile;
-                fileKey = 'enhancing-placeholder';
-            }
-        }
-        
         if (!fileToDisplay) return null;
         
         return (
@@ -242,7 +178,6 @@ const ResumeAnalysis = ({ backendStatus }) => {
                     renderTextLayer={true}
                     renderAnnotationLayer={true}
                     renderMode="canvas"
-                    className={viewMode === 'enhanced' && enhancedPdfUrl ? 'enhanced-page' : ''}
                     loading={
                         <div className="pdf-page-loading">
                             <div className="loading-spinner small"></div>
@@ -251,7 +186,7 @@ const ResumeAnalysis = ({ backendStatus }) => {
                 />
             </Document>
         );
-    }, [pdfFile, pageNumber, viewMode, enhancedPdfUrl, isEnhancing]);
+    }, [pdfFile, pageNumber]);
 
     const tabData = React.useMemo(() => ({
         content: { 
@@ -543,7 +478,7 @@ const ResumeAnalysis = ({ backendStatus }) => {
                         transition={{ duration: 0.5 }}
                     >
                         {/* Header */}
-                        <div className="results-header">
+                            <div className="results-header">
                             <button className="back-button" onClick={() => navigate('/')}>
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M12 4L6 10L12 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -552,7 +487,9 @@ const ResumeAnalysis = ({ backendStatus }) => {
                             </button>
                             <div className="header-actions">
                                 <button className="btn-secondary" onClick={() => navigate('/')}>New Upload</button>
-                                <button className="btn-primary">Edit & Fix Resume</button>
+                                <button className="btn-primary" onClick={() => navigate('/job-suggestions')}>
+                                    Job Suggestions
+                                </button>
                             </div>
                         </div>
 
@@ -733,42 +670,13 @@ const ResumeAnalysis = ({ backendStatus }) => {
                                         </svg>
                                         Your Resume
                                     </div>
-                                    <div className="view-toggle">
-                                        <button
-                                            className={`toggle-btn ${viewMode === 'original' ? 'active' : ''}`}
-                                            onClick={() => {
-                                                setViewMode('original');
-                                                setPageNumber(1);
-                                            }}
-                                        >
-                                            Original
-                                        </button>
-                                        <button
-                                            className={`toggle-btn ${viewMode === 'enhanced' ? 'active' : ''}`}
-                                            onClick={handleEnhance}
-                                        >
-                                            Enhancv
-                                        </button>
-                                    </div>
                                 </div>
 
                                 <div className="preview-content">
                                     <div className="resume-preview-card">
                                         {pdfFile ? (
                                             <div className="pdf-preview-container">
-                                                {(isAnalyzing || isEnhancing) && <div className="scanning-line"></div>}
-                                                {isEnhancing && (
-                                                    <div className="enhancing-overlay">
-                                                        <div className="dna-loader"></div>
-                                                        <p className="enhancing-text">AI ENHANCING RESUME...</p>
-                                                    </div>
-                                                )}
-                                                {viewMode === 'enhanced' && !isEnhancing && (
-                                                    <div className="enhanced-badge-overlay">
-                                                        <span className="enhanced-badge-icon">✨</span>
-                                                        <span className="enhanced-badge-text">AI ENHANCED VIEW</span>
-                                                    </div>
-                                                )}
+                                                {isAnalyzing && <div className="scanning-line"></div>}
                                                 {pdfPreview}
                                                 {numPages && numPages > 1 && (
                                                     <div className="pdf-navigation">
@@ -805,22 +713,6 @@ const ResumeAnalysis = ({ backendStatus }) => {
                                         )}
                                     </div>
 
-                                    {viewMode === 'enhanced' && enhancementChanges.length > 0 && (
-                                        <div className="enhancement-details">
-                                            <div className="enhancement-details-title">
-                                                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                                                    <path d="M7 10l2 2 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                    <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="2" />
-                                                </svg>
-                                                AI ENHANCEMENT DETAILS
-                                            </div>
-                                            <ul className="enhancement-list">
-                                                {enhancementChanges.map((change, idx) => (
-                                                    <li key={idx} className="enhancement-item">{change}</li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         </div>

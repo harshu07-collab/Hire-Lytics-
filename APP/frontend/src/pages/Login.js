@@ -293,11 +293,14 @@ const Login = () => {
                                 <span>Or continue with</span>
                             </motion.div>
 
-                            <motion.div className="social-buttons" variants={itemVariants}>
+                            <motion.div className="social-buttons social-buttons-single" variants={itemVariants}>
                                 <div className="google-login-wrapper">
                                     <GoogleLogin
                                         onSuccess={handleGoogleSuccess}
                                         onError={handleGoogleError}
+                                        shape="pill"
+                                        size="large"
+                                        width="260"
                                         useOneTap
                                     />
                                 </div>

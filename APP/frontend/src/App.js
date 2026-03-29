@@ -11,6 +11,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResumeTemplates from './pages/ResumeTemplates';
 import ResumeAnalysis from './pages/ResumeAnalysis';
+import JobSuggestions from './pages/JobSuggestions';
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -66,6 +67,7 @@ function App() {
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/templates" element={<ResumeTemplates backendStatus={backendStatus} />} />
                             <Route path="/analysis" element={<ResumeAnalysis backendStatus={backendStatus} />} />
+                            <Route path="/job-suggestions" element={<JobSuggestions backendStatus={backendStatus} />} />
                             <Route
                                 path="/"
                                 element={

@@ -36,7 +36,7 @@ class SupabaseService:
         else:
             logger.warning("Supabase not configured properly")
             self.client = None
-    
+
     async def create_user(
         self,
         email: str,
@@ -58,7 +58,7 @@ class SupabaseService:
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "last_login": None
             }
-        
+
         try:
             data = {
                 "email": email,
@@ -70,57 +70,57 @@ class SupabaseService:
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "last_login": None
             }
-            
+
             response = self.client.table("users").insert(data).execute()
             logger.info(f"User created: {email}")
             return response.data[0] if response.data else None
         except Exception as e:
             logger.error(f"Error creating user {email}: {str(e)}")
             return None
-    
+
     async def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """Get user by email"""
         if not self.available:
             logger.warning("Supabase not available, returning mock user")
             return None  # No mock user
-        
+
         try:
             response = self.client.table("users").select("*").eq("email", email).execute()
             return response.data[0] if response.data else None
         except Exception as e:
             logger.error(f"Error getting user {email}: {str(e)}")
             return None
-    
+
     async def get_user_by_id(self, user_id: str) -> Optional[Dict[str, Any]]:
         """Get user by ID"""
         if not self.available:
             return None
-        
+
         try:
             response = self.client.table("users").select("*").eq("id", user_id).execute()
             return response.data[0] if response.data else None
         except Exception as e:
             logger.error(f"Error getting user {user_id}: {str(e)}")
             return None
-    
+
     async def get_user_by_google_id(self, google_id: str) -> Optional[Dict[str, Any]]:
         """Get user by Google ID"""
         if not self.available:
             return None
-        
+
         try:
             response = self.client.table("users").select("*").eq("google_id", google_id).execute()
             return response.data[0] if response.data else None
         except Exception as e:
             logger.error(f"Error getting user by Google ID: {str(e)}")
             return None
-    
+
     async def verify_user(self, user_id: str) -> bool:
         """Mark user as verified"""
         if not self.available:
             logger.warning("Supabase not available, simulating user verification")
             return True
-        
+
         try:
             self.client.table("users").update({
                 "is_verified": True
@@ -130,13 +130,13 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error verifying user {user_id}: {str(e)}")
             return False
-    
+
     async def update_last_login(self, user_id: str) -> bool:
         """Update user's last login timestamp"""
         if not self.available:
             logger.warning("Supabase not available, simulating last login update")
             return True
-        
+
         try:
             self.client.table("users").update({
                 "last_login": datetime.now(timezone.utc).isoformat()
@@ -146,25 +146,25 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error updating last login for {user_id}: {str(e)}")
             return False
-    
+
     async def update_user(self, user_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update user data"""
         if not self.available:
             logger.warning("Supabase not available, simulating user update")
             return None
-        
+
         try:
             response = self.client.table("users").update(data).eq("id", user_id).execute()
             return response.data[0] if response.data else None
         except Exception as e:
             logger.error(f"Error updating user {user_id}: {str(e)}")
             return None
-    
+
     async def check_email_exists(self, email: str) -> bool:
         """Check if email already exists"""
         if not self.available:
             return False
-        
+
         try:
             response = self.client.table("users").select("id").eq("email", email).execute()
             return len(response.data) > 0
