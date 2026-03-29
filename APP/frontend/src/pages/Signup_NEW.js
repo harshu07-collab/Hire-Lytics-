@@ -12,9 +12,8 @@ import '../styles/Auth.css';
 const Signup = () => {
     const navigate = useNavigate();
     const { login, BACKEND_URL, setAuthError } = useAuth();
-    const isGoogleEnabled = Boolean(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
-    const [step, setStep] = useState('email');
+    const [step, setStep] = useState('email'); // email, otp, success
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -44,6 +43,9 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // STEP 1: SIGNUP - REQUEST OTP
+    // ============================================================
     const handleSendOTP = async (e) => {
         e.preventDefault();
 
@@ -75,7 +77,13 @@ const Signup = () => {
                 { email, type: 'signup' }
             );
 
+            console.log('OTP sent:', response.data);
             setStep('otp');
+
+            // If OTP returned (for testing), show it
+            if (response.data.otp) {
+                console.log('DEBUG OTP:', response.data.otp);
+            }
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Failed to send OTP';
             setErrors({ general: errorMessage });
@@ -85,6 +93,9 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // STEP 2: VERIFY OTP AND CREATE ACCOUNT
+    // ============================================================
     const handleVerifyOTP = async (e) => {
         e.preventDefault();
 
@@ -104,8 +115,10 @@ const Signup = () => {
 
             const { access_token, refresh_token, user } = response.data;
 
+            // Store in auth context
             login(user, access_token, refresh_token);
 
+            // Redirect to app
             setTimeout(() => {
                 window.location.href = '/';
             }, 500);
@@ -118,19 +131,28 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // GOOGLE SIGNUP
+    // ============================================================
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             setIsLoading(true);
 
             const response = await axios.post(
                 `${BACKEND_URL}/api/auth/google`,
-                { token: credentialResponse.credential }
+                {
+                    token: credentialResponse.credential,
+                    name: credentialResponse.name || name || 'User',
+                    email: credentialResponse.email || ''
+                }
             );
 
             const { access_token, refresh_token, user } = response.data;
 
+            // Store in auth context
             login(user, access_token, refresh_token);
 
+            // Redirect to app
             setTimeout(() => {
                 window.location.href = '/';
             }, 500);
@@ -185,6 +207,7 @@ const Signup = () => {
                         </motion.div>
                     )}
 
+                    {/* STEP 1: NAME & EMAIL INPUT */}
                     {step === 'email' && (
                         <motion.form
                             className="auth-form"
@@ -256,6 +279,7 @@ const Signup = () => {
                         </motion.form>
                     )}
 
+                    {/* STEP 2: OTP VERIFICATION */}
                     {step === 'otp' && (
                         <motion.form
                             className="auth-form"
@@ -317,7 +341,7 @@ const Signup = () => {
                         </motion.form>
                     )}
 
-                    {step === 'email' && isGoogleEnabled && (
+                    {step === 'email' && (
                         <>
                             <motion.div className="divider" variants={itemVariants}>
                                 <span>Or continue with</span>

@@ -1,0 +1,20 @@
+Resend requires domain verification, using SMTP fallback
+INFO:     Started server process [119932]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-03-29 01:52:44,514 - httpx - INFO - HTTP Request: GET https://rlfappahvvqiwwaxmcec.supabase.co/rest/v1/users?select=%2A&email=eq.tech.savvy.harsh%40gmail.com "HTTP/2 404 Not Found"
+2026-03-29 01:52:44,517 - supabase_service - ERROR - Error getting user tech.savvy.harsh@gmail.com: {'message': "Could not find the table 'public.users' in the schema cache", 'code': 'PGRST205', 'hint': None, 'details': None}
+2026-03-29 01:52:44,517 - auth_routes - WARNING - Login attempt for non-existent email: tech.savvy.harsh@gmail.com
+2026-03-29 01:52:49,891 - email_service - INFO - Email sent to tech.savvy.harsh@gmail.com via SMTP
+2026-03-29 01:53:05,247 - httpx - INFO - HTTP Request: GET https://rlfappahvvqiwwaxmcec.supabase.co/rest/v1/users?select=%2A&email=eq.tech.savvy.harsh%40gmail.com "HTTP/2 404 Not Found"
+2026-03-29 01:53:05,248 - supabase_service - ERROR - Error getting user tech.savvy.harsh@gmail.com: {'message': "Could not find the table 'public.users' in the schema cache", 'code': 'PGRST205', 'hint': None, 'details': None}
+2026-03-29 01:53:05,248 - auth_routes - WARNING - Login attempt for non-existent email: tech.savvy.harsh@gmail.com
+2026-03-29 01:53:09,501 - email_service - INFO - Email sent to tech.savvy.harsh@gmail.com via SMTP
+2026-03-29 01:54:46,800 - httpx - INFO - HTTP Request: GET https://rlfappahvvqiwwaxmcec.supabase.co/rest/v1/users?select=%2A&google_id=eq.109701149101813670551 "HTTP/2 404 Not Found"
+2026-03-29 01:54:46,801 - supabase_service - ERROR - Error getting user by Google ID: {'message': "Could not find the table 'public.users' in the schema cache", 'code': 'PGRST205', 'hint': None, 'details': None}
+2026-03-29 01:54:47,004 - httpx - INFO - HTTP Request: GET https://rlfappahvvqiwwaxmcec.supabase.co/rest/v1/users?select=%2A&email=eq.tech.savvy.harsh%40gmail.com "HTTP/2 404 Not Found"
+2026-03-29 01:54:47,012 - supabase_service - ERROR - Error getting user tech.savvy.harsh@gmail.com: {'message': "Could not find the table 'public.users' in the schema cache", 'code': 'PGRST205', 'hint': None, 'details': None}
+2026-03-29 01:54:47,253 - httpx - INFO - HTTP Request: POST https://rlfappahvvqiwwaxmcec.supabase.co/rest/v1/users "HTTP/2 404 Not Found"
+2026-03-29 01:54:47,254 - supabase_service - ERROR - Error creating user tech.savvy.harsh@gmail.com: {'message': "Could not find the table 'public.users' in the schema cache", 'code': 'PGRST205', 'hint': None, 'details': None}
+2026-03-29 01:54:47,254 - auth_routes - ERROR - Error in google_auth: 500: Failed to create user

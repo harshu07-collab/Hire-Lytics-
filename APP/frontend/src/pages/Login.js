@@ -1,94 +1,24 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, Github, Chrome, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Github, Chrome, ArrowLeft, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
+import axios from 'axios';
 import Logo from '../components/Logo';
 import AnimatedGradientBackground from '../components/AnimatedGradientBackground';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/Auth.css';
 
 const Login = () => {
     const navigate = useNavigate();
-    const [showPassword, setShowPassword] = useState(false);
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
+    const { login, BACKEND_URL, setAuthError } = useAuth();
+    const isGoogleEnabled = Boolean(process.env.REACT_APP_GOOGLE_CLIENT_ID);
+
+    const [step, setStep] = useState('email');
+    const [email, setEmail] = useState('');
+    const [otp, setOtp] = useState('');
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
-
-    // Temporary credentials for demo
-    const DEMO_CREDENTIALS = {
-        username: 'Harsh Gupta',
-        email: 'harsh@hirelytic.com',
-        password: 'harsh@123'
-    };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            // Check demo credentials
-            if (formData.email === DEMO_CREDENTIALS.email && formData.password === DEMO_CREDENTIALS.password) {
-                // Store user session
-                sessionStorage.setItem('user', JSON.stringify({
-                    name: DEMO_CREDENTIALS.username,
-                    email: DEMO_CREDENTIALS.email,
-                    isAuthenticated: true
-                }));
-
-                // Redirect to main app
-                window.location.href = '/';
-            } else {
-                setErrors({
-                    general: 'Invalid email or password. Try: harsh@hirelytic.com / harsh@123'
-                });
-            }
-            setIsLoading(false);
-        }, 1000);
-    };
-
-    const handleSocialLogin = (provider) => {
-        // Placeholder for future OAuth integration
-        console.log(`${provider} login will be integrated in the future`);
-        alert(`${provider} authentication will be available soon!`);
-    };
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -111,6 +41,104 @@ const Login = () => {
                 duration: 0.4
             }
         }
+    };
+
+    const handleSendOTP = async (e) => {
+        e.preventDefault();
+
+        const newErrors = {};
+        if (!email) {
+            newErrors.email = 'Email is required';
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            newErrors.email = 'Email is invalid';
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setIsLoading(true);
+        setErrors({});
+
+        try {
+            const response = await axios.post(
+                `${BACKEND_URL}/api/auth/login/send-otp`,
+                { email, type: 'login' }
+            );
+
+            console.log('OTP sent:', response.data);
+            setStep('otp');
+            if (response.data.otp) {
+                console.log('DEBUG OTP:', response.data.otp);
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.detail || 'Failed to send OTP';
+            setErrors({ general: errorMessage });
+            setAuthError(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleVerifyOTP = async (e) => {
+        e.preventDefault();
+
+        if (!otp || otp.length !== 6) {
+            setErrors({ otp: 'OTP must be 6 digits' });
+            return;
+        }
+
+        setIsLoading(true);
+        setErrors({});
+
+        try {
+            const response = await axios.post(
+                `${BACKEND_URL}/api/auth/login/verify-otp`,
+                { email, otp }
+            );
+
+            const { access_token, refresh_token, user } = response.data;
+            login(user, access_token, refresh_token);
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 500);
+        } catch (error) {
+            const errorMessage = error.response?.data?.detail || 'Failed to verify OTP';
+            setErrors({ general: errorMessage });
+            setAuthError(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            setIsLoading(true);
+
+            const response = await axios.post(
+                `${BACKEND_URL}/api/auth/google`,
+                { token: credentialResponse.credential }
+            );
+
+            const { access_token, refresh_token, user } = response.data;
+            login(user, access_token, refresh_token);
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 500);
+        } catch (error) {
+            const errorMessage = error.response?.data?.detail || 'Google authentication failed';
+            setErrors({ general: errorMessage });
+            setAuthError(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setErrors({ general: 'Google authentication failed' });
     };
 
     return (
@@ -136,7 +164,9 @@ const Login = () => {
                     <motion.div className="auth-header" variants={itemVariants}>
                         <Logo className="mb-4 justify-center" />
                         <h1 className="auth-title">Welcome Back</h1>
-                        <p className="auth-subtitle">Sign in to continue to Hirelytic</p>
+                        <p className="auth-subtitle">
+                            {step === 'email' ? 'Sign in to continue to Hirelytic' : 'Verify your email with OTP'}
+                        </p>
                     </motion.div>
 
                     {errors.general && (
@@ -149,114 +179,137 @@ const Login = () => {
                         </motion.div>
                     )}
 
-                    <motion.form
-                        className="auth-form"
-                        onSubmit={handleSubmit}
-                        variants={itemVariants}
-                    >
-                        <div className="form-group">
-                            <label htmlFor="email" className="form-label">
-                                Email Address
-                            </label>
-                            <div className="input-wrapper">
-                                <Mail className="input-icon" size={20} />
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    className={`form-input ${errors.email ? 'error' : ''}`}
-                                    placeholder="you@example.com"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                />
+                    {step === 'email' && (
+                        <motion.form
+                            className="auth-form"
+                            onSubmit={handleSendOTP}
+                            variants={itemVariants}
+                        >
+                            <div className="form-group">
+                                <label htmlFor="email" className="form-label">
+                                    Email Address
+                                </label>
+                                <div className="input-wrapper">
+                                    <Mail className="input-icon" size={20} />
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        className={`form-input ${errors.email ? 'error' : ''}`}
+                                        placeholder="you@example.com"
+                                        value={email}
+                                        onChange={(e) => {
+                                            setEmail(e.target.value);
+                                            if (errors.email) {
+                                                setErrors({ ...errors, email: '' });
+                                            }
+                                        }}
+                                        disabled={isLoading}
+                                    />
+                                </div>
+                                {errors.email && <span className="error-text">{errors.email}</span>}
                             </div>
-                            {errors.email && <span className="error-text">{errors.email}</span>}
-                        </div>
 
-                        <div className="form-group">
-                            <label htmlFor="password" className="form-label">
-                                Password
-                            </label>
-                            <div className="input-wrapper">
-                                <Lock className="input-icon" size={20} />
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    id="password"
-                                    name="password"
-                                    className={`form-input ${errors.password ? 'error' : ''}`}
-                                    placeholder="Enter your password"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    disabled={isLoading}
-                                />
-                                <button
-                                    type="button"
-                                    className="password-toggle"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
+                            <button
+                                type="submit"
+                                className="submit-button"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader size={20} className="animate-spin" />
+                                        <span>Sending OTP...</span>
+                                    </>
+                                ) : (
+                                    'Send OTP'
+                                )}
+                            </button>
+                        </motion.form>
+                    )}
+
+                    {step === 'otp' && (
+                        <motion.form
+                            className="auth-form"
+                            onSubmit={handleVerifyOTP}
+                            variants={itemVariants}
+                        >
+                            <div className="form-group">
+                                <label htmlFor="otp" className="form-label">
+                                    Enter 6-digit OTP
+                                </label>
+                                <p className="form-helper">
+                                    Check your email {email} for the code
+                                </p>
+                                <div className="input-wrapper">
+                                    <Lock className="input-icon" size={20} />
+                                    <input
+                                        type="text"
+                                        id="otp"
+                                        className={`form-input otp-input ${errors.otp ? 'error' : ''}`}
+                                        placeholder="000000"
+                                        value={otp}
+                                        onChange={(e) => {
+                                            const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                            setOtp(value);
+                                            if (errors.otp) {
+                                                setErrors({ ...errors, otp: '' });
+                                            }
+                                        }}
+                                        disabled={isLoading}
+                                        maxLength="6"
+                                    />
+                                </div>
+                                {errors.otp && <span className="error-text">{errors.otp}</span>}
                             </div>
-                            {errors.password && <span className="error-text">{errors.password}</span>}
-                        </div>
 
-                        <div className="form-options">
-                            <label className="checkbox-label">
-                                <input type="checkbox" className="checkbox" />
-                                <span>Remember me</span>
-                            </label>
-                            <a href="#forgot" className="forgot-link">Forgot password?</a>
-                        </div>
+                            <button
+                                type="submit"
+                                className="submit-button"
+                                disabled={isLoading || otp.length !== 6}
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <Loader size={20} className="animate-spin" />
+                                        <span>Verifying...</span>
+                                    </>
+                                ) : (
+                                    'Verify OTP'
+                                )}
+                            </button>
 
-                        <button
-                            type="submit"
-                            className="submit-button"
-                            disabled={isLoading}
-                        >
-                            {isLoading ? (
-                                <span className="loading-spinner"></span>
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
-                    </motion.form>
+                            <button
+                                type="button"
+                                className="resend-button"
+                                onClick={handleSendOTP}
+                                disabled={isLoading}
+                            >
+                                Resend OTP
+                            </button>
+                        </motion.form>
+                    )}
 
-                    <motion.div className="divider" variants={itemVariants}>
-                        <span>Or continue with</span>
-                    </motion.div>
+                    {step === 'email' && isGoogleEnabled && (
+                        <>
+                            <motion.div className="divider" variants={itemVariants}>
+                                <span>Or continue with</span>
+                            </motion.div>
 
-                    <motion.div className="social-buttons" variants={itemVariants}>
-                        <button
-                            className="social-button google"
-                            onClick={() => handleSocialLogin('Google')}
-                            type="button"
-                        >
-                            <Chrome size={20} />
-                            <span>Google</span>
-                        </button>
-                        <button
-                            className="social-button github"
-                            onClick={() => handleSocialLogin('GitHub')}
-                            type="button"
-                        >
-                            <Github size={20} />
-                            <span>GitHub</span>
-                        </button>
-                    </motion.div>
+                            <motion.div className="social-buttons" variants={itemVariants}>
+                                <div className="google-login-wrapper">
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleSuccess}
+                                        onError={handleGoogleError}
+                                        useOneTap
+                                    />
+                                </div>
+                            </motion.div>
+                        </>
+                    )}
 
                     <motion.div className="auth-footer" variants={itemVariants}>
                         <p>
                             Don't have an account?{' '}
                             <a href="/signup" className="auth-link">Sign up</a>
                         </p>
-                    </motion.div>
-
-                    <motion.div className="demo-credentials" variants={itemVariants}>
-                        <p className="demo-title">Demo Credentials:</p>
-                        <p className="demo-text">Email: harsh@hirelytic.com</p>
-                        <p className="demo-text">Password: harsh@123</p>
                     </motion.div>
                 </div>
             </motion.div>

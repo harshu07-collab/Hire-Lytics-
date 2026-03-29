@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, User, Github, Chrome, ArrowLeft, Loader } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Github, Chrome, ArrowLeft, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
@@ -9,17 +9,16 @@ import AnimatedGradientBackground from '../components/AnimatedGradientBackground
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Auth.css';
 
-const Signup = () => {
+const Login = () => {
     const navigate = useNavigate();
     const { login, BACKEND_URL, setAuthError } = useAuth();
-    const isGoogleEnabled = Boolean(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
-    const [step, setStep] = useState('email');
-    const [name, setName] = useState('');
+    const [step, setStep] = useState('email'); // email, otp, success
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -44,17 +43,13 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // STEP 1: REQUEST OTP
+    // ============================================================
     const handleSendOTP = async (e) => {
         e.preventDefault();
 
         const newErrors = {};
-
-        if (!name) {
-            newErrors.name = 'Name is required';
-        } else if (name.length < 2) {
-            newErrors.name = 'Name must be at least 2 characters';
-        }
-
         if (!email) {
             newErrors.email = 'Email is required';
         } else if (!/\S+@\S+\.\S+/.test(email)) {
@@ -71,11 +66,16 @@ const Signup = () => {
 
         try {
             const response = await axios.post(
-                `${BACKEND_URL}/api/auth/signup/send-otp`,
-                { email, type: 'signup' }
+                `${BACKEND_URL}/api/auth/login/send-otp`,
+                { email, type: 'login' }
             );
 
+            console.log('OTP sent:', response.data);
             setStep('otp');
+            // If OTP returned (for testing), show it
+            if (response.data.otp) {
+                console.log('DEBUG OTP:', response.data.otp);
+            }
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Failed to send OTP';
             setErrors({ general: errorMessage });
@@ -85,6 +85,9 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // STEP 2: VERIFY OTP
+    // ============================================================
     const handleVerifyOTP = async (e) => {
         e.preventDefault();
 
@@ -98,14 +101,16 @@ const Signup = () => {
 
         try {
             const response = await axios.post(
-                `${BACKEND_URL}/api/auth/signup/verify-otp`,
-                { email, otp, name }
+                `${BACKEND_URL}/api/auth/login/verify-otp`,
+                { email, otp }
             );
 
             const { access_token, refresh_token, user } = response.data;
 
+            // Store in auth context
             login(user, access_token, refresh_token);
 
+            // Redirect to app
             setTimeout(() => {
                 window.location.href = '/';
             }, 500);
@@ -118,19 +123,28 @@ const Signup = () => {
         }
     };
 
+    // ============================================================
+    // GOOGLE LOGIN
+    // ============================================================
     const handleGoogleSuccess = async (credentialResponse) => {
         try {
             setIsLoading(true);
 
             const response = await axios.post(
                 `${BACKEND_URL}/api/auth/google`,
-                { token: credentialResponse.credential }
+                {
+                    token: credentialResponse.credential,
+                    name: credentialResponse.name || 'User',
+                    email: credentialResponse.email || ''
+                }
             );
 
             const { access_token, refresh_token, user } = response.data;
 
+            // Store in auth context
             login(user, access_token, refresh_token);
 
+            // Redirect to app
             setTimeout(() => {
                 window.location.href = '/';
             }, 500);
@@ -169,9 +183,9 @@ const Signup = () => {
                 <div className="auth-card">
                     <motion.div className="auth-header" variants={itemVariants}>
                         <Logo className="mb-4 justify-center" />
-                        <h1 className="auth-title">Create Account</h1>
+                        <h1 className="auth-title">Welcome Back</h1>
                         <p className="auth-subtitle">
-                            {step === 'email' ? 'Get started with Hirelytic' : 'Verify your email with OTP'}
+                            {step === 'email' ? 'Sign in to continue to Hirelytic' : 'Verify your email with OTP'}
                         </p>
                     </motion.div>
 
@@ -185,36 +199,13 @@ const Signup = () => {
                         </motion.div>
                     )}
 
+                    {/* STEP 1: EMAIL INPUT */}
                     {step === 'email' && (
                         <motion.form
                             className="auth-form"
                             onSubmit={handleSendOTP}
                             variants={itemVariants}
                         >
-                            <div className="form-group">
-                                <label htmlFor="name" className="form-label">
-                                    Full Name
-                                </label>
-                                <div className="input-wrapper">
-                                    <User className="input-icon" size={20} />
-                                    <input
-                                        type="text"
-                                        id="name"
-                                        className={`form-input ${errors.name ? 'error' : ''}`}
-                                        placeholder="John Doe"
-                                        value={name}
-                                        onChange={(e) => {
-                                            setName(e.target.value);
-                                            if (errors.name) {
-                                                setErrors({ ...errors, name: '' });
-                                            }
-                                        }}
-                                        disabled={isLoading}
-                                    />
-                                </div>
-                                {errors.name && <span className="error-text">{errors.name}</span>}
-                            </div>
-
                             <div className="form-group">
                                 <label htmlFor="email" className="form-label">
                                     Email Address
@@ -256,6 +247,7 @@ const Signup = () => {
                         </motion.form>
                     )}
 
+                    {/* STEP 2: OTP INPUT */}
                     {step === 'otp' && (
                         <motion.form
                             className="auth-form"
@@ -299,10 +291,10 @@ const Signup = () => {
                                 {isLoading ? (
                                     <>
                                         <Loader size={20} className="animate-spin" />
-                                        <span>Creating Account...</span>
+                                        <span>Verifying...</span>
                                     </>
                                 ) : (
-                                    'Create Account'
+                                    'Verify OTP'
                                 )}
                             </button>
 
@@ -317,7 +309,7 @@ const Signup = () => {
                         </motion.form>
                     )}
 
-                    {step === 'email' && isGoogleEnabled && (
+                    {step === 'email' && (
                         <>
                             <motion.div className="divider" variants={itemVariants}>
                                 <span>Or continue with</span>
@@ -337,8 +329,8 @@ const Signup = () => {
 
                     <motion.div className="auth-footer" variants={itemVariants}>
                         <p>
-                            Already have an account?{' '}
-                            <a href="/login" className="auth-link">Sign in</a>
+                            Don't have an account?{' '}
+                            <a href="/signup" className="auth-link">Sign up</a>
                         </p>
                     </motion.div>
                 </div>
@@ -347,4 +339,4 @@ const Signup = () => {
     );
 };
 
-export default Signup;
+export default Login;

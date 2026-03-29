@@ -2,13 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'next-themes';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import '@/App.css';
+import { AuthProvider } from './contexts/AuthContext';
 import GoogleSearchIntro from './components/GoogleSearchIntro';
 import HirelyticApp from './components/HirelyticApp';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResumeTemplates from './pages/ResumeTemplates';
 import ResumeAnalysis from './pages/ResumeAnalysis';
+
+const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 function App() {
     const [showIntro, setShowIntro] = useState(true);
@@ -52,26 +56,41 @@ function App() {
         setHasSeenIntro(true);
     };
 
-    return (
+    const appContent = (
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <Router>
-                <div className="App">
-                    <Routes>
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/signup" element={<Signup />} />
-                        <Route path="/templates" element={<ResumeTemplates backendStatus={backendStatus} />} />
-                        <Route path="/analysis" element={<ResumeAnalysis backendStatus={backendStatus} />} />
-                        <Route path="/" element={
-                            showIntro && !hasSeenIntro ? (
-                                <GoogleSearchIntro onComplete={handleIntroComplete} />
-                            ) : (
-                                <HirelyticApp backendStatus={backendStatus} />
-                            )
-                        } />
-                    </Routes>
-                </div>
-            </Router>
+            <AuthProvider>
+                <Router>
+                    <div className="App">
+                        <Routes>
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/signup" element={<Signup />} />
+                            <Route path="/templates" element={<ResumeTemplates backendStatus={backendStatus} />} />
+                            <Route path="/analysis" element={<ResumeAnalysis backendStatus={backendStatus} />} />
+                            <Route
+                                path="/"
+                                element={
+                                    showIntro && !hasSeenIntro ? (
+                                        <GoogleSearchIntro onComplete={handleIntroComplete} />
+                                    ) : (
+                                        <HirelyticApp backendStatus={backendStatus} />
+                                    )
+                                }
+                            />
+                        </Routes>
+                    </div>
+                </Router>
+            </AuthProvider>
         </ThemeProvider>
+    );
+
+    if (!GOOGLE_CLIENT_ID) {
+        return appContent;
+    }
+
+    return (
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            {appContent}
+        </GoogleOAuthProvider>
     );
 }
 

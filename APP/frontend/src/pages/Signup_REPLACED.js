@@ -12,7 +12,6 @@ import '../styles/Auth.css';
 const Signup = () => {
     const navigate = useNavigate();
     const { login, BACKEND_URL, setAuthError } = useAuth();
-    const isGoogleEnabled = Boolean(process.env.REACT_APP_GOOGLE_CLIENT_ID);
 
     const [step, setStep] = useState('email');
     const [name, setName] = useState('');
@@ -75,7 +74,12 @@ const Signup = () => {
                 { email, type: 'signup' }
             );
 
+            console.log('OTP sent:', response.data);
             setStep('otp');
+
+            if (response.data.otp) {
+                console.log('DEBUG OTP:', response.data.otp);
+            }
         } catch (error) {
             const errorMessage = error.response?.data?.detail || 'Failed to send OTP';
             setErrors({ general: errorMessage });
@@ -124,7 +128,11 @@ const Signup = () => {
 
             const response = await axios.post(
                 `${BACKEND_URL}/api/auth/google`,
-                { token: credentialResponse.credential }
+                {
+                    token: credentialResponse.credential,
+                    name: credentialResponse.name || name || 'User',
+                    email: credentialResponse.email || ''
+                }
             );
 
             const { access_token, refresh_token, user } = response.data;
@@ -317,7 +325,7 @@ const Signup = () => {
                         </motion.form>
                     )}
 
-                    {step === 'email' && isGoogleEnabled && (
+                    {step === 'email' && (
                         <>
                             <motion.div className="divider" variants={itemVariants}>
                                 <span>Or continue with</span>

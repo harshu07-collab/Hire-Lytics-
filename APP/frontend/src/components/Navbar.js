@@ -10,6 +10,7 @@ import {
 import { Switch } from './ui/switch';
 import { cn } from '../lib/utils';
 import Logo from './Logo';
+import { useAuth } from '../contexts/AuthContext';
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -131,7 +132,7 @@ const Navbar = ({ backendStatus }) => {
     const [scrolled, setScrolled] = useState(false);
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    const [user, setUser] = useState(null);
+    const { user, logout, isAuthenticated } = useAuth();
     const [showBanner, setShowBanner] = useState(true);
 
     useEffect(() => {
@@ -140,18 +141,6 @@ const Navbar = ({ backendStatus }) => {
             setScrolled(window.scrollY > 20);
         };
         window.addEventListener('scroll', handleScroll);
-
-        const checkUser = () => {
-            const storedUser = sessionStorage.getItem('user');
-            if (storedUser) {
-                try {
-                    setUser(JSON.parse(storedUser));
-                } catch (error) {
-                    console.error('Error parsing user data:', error);
-                }
-            }
-        };
-        checkUser();
 
         // Banner fade out after 5 seconds
         const bannerTimer = setTimeout(() => {
@@ -165,8 +154,7 @@ const Navbar = ({ backendStatus }) => {
     }, []);
 
     const handleLogout = () => {
-        sessionStorage.removeItem('user');
-        setUser(null);
+        logout();
         window.location.href = '/';
     };
 
@@ -376,7 +364,7 @@ const Navbar = ({ backendStatus }) => {
                         />
                         <Moon className="h-4 w-4 text-blue-500" />
                     </div>
-                    {user ? (
+                    {isAuthenticated && user ? (
                         <div className="user-menu">
                             <div className="user-info">
                                 <User className="user-icon" size={16} />

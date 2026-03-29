@@ -17,7 +17,17 @@ import json
 import base64
 from fpdf import FPDF
 
-load_dotenv()
+# Load env from APP/.env (one level above backend)
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_PATH)
+
+# Import authentication modules
+try:
+    from auth_routes import router as auth_router
+    AUTH_AVAILABLE = True
+except ImportError:
+    AUTH_AVAILABLE = False
+    print("WARNING: auth_routes module not found. Authentication features will be disabled.")
 
 # ✅ Initialize Groq client
 client = Groq(
@@ -247,7 +257,6 @@ Resume text to analyze:
 origins = ["http://localhost:3000"]
 
 ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
 
 app = FastAPI()
 
@@ -537,10 +546,14 @@ Return this exact JSON structure:
 
 
 # ============================================================
-# REGISTER ROUTER
+# REGISTER ROUTERS
 # ============================================================
 
 app.include_router(api_router)
+
+# Include authentication router if available
+if AUTH_AVAILABLE:
+    app.include_router(auth_router)
 
 
 if __name__ == "__main__":
