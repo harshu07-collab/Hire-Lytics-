@@ -10,8 +10,10 @@ import HirelyticApp from './components/HirelyticApp';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ResumeTemplates from './pages/ResumeTemplates';
+import TemplatePreview from './pages/TemplatePreview';
 import ResumeAnalysis from './pages/ResumeAnalysis';
 import JobSuggestions from './pages/JobSuggestions';
+import ResumeEditor from './pages/ResumeEditor';
 
 const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
@@ -66,6 +68,8 @@ function App() {
                             <Route path="/login" element={<Login />} />
                             <Route path="/signup" element={<Signup />} />
                             <Route path="/templates" element={<ResumeTemplates backendStatus={backendStatus} />} />
+                            <Route path="/templates/:templateId" element={<TemplatePreview backendStatus={backendStatus} />} />
+                            <Route path="/builder" element={<ResumeEditor backendStatus={backendStatus} />} />
                             <Route path="/analysis" element={<ResumeAnalysis backendStatus={backendStatus} />} />
                             <Route path="/job-suggestions" element={<JobSuggestions backendStatus={backendStatus} />} />
                             <Route

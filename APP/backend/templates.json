@@ -1,0 +1,142 @@
+[
+    {
+        "id": "trad-heritage",
+        "name": "Heritage Serif",
+        "category": "Traditional",
+        "description": "Classic layout with strong typographic hierarchy.",
+        "accent": "emerald",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "trad-column",
+        "name": "Executive Column",
+        "category": "Traditional",
+        "description": "Two-column structure built for experienced roles.",
+        "accent": "slate",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "modern-grid",
+        "name": "Gridline Modern",
+        "category": "Modern",
+        "description": "Crisp grid system with balanced white space.",
+        "accent": "teal",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "modern-impact",
+        "name": "Impact Bold",
+        "category": "Modern",
+        "description": "Strong headline with ATS-safe sections.",
+        "accent": "blue",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "creative-aurora",
+        "name": "Aurora Studio",
+        "category": "Creative",
+        "description": "Vibrant accents for design and media roles.",
+        "accent": "cyan",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "creative-portfolio",
+        "name": "Portfolio Flow",
+        "category": "Creative",
+        "description": "Portfolio-forward layout with project highlights.",
+        "accent": "rose",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "simple-clean",
+        "name": "Clean Slate",
+        "category": "Simple",
+        "description": "Minimal sections and clear scanning path.",
+        "accent": "amber",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "simple-core",
+        "name": "Core Essentials",
+        "category": "Simple",
+        "description": "Single-column, clean spacing, quick scan.",
+        "accent": "stone",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "pro-analyst",
+        "name": "Analyst Prime",
+        "category": "Professional",
+        "description": "Structured sections for metrics-heavy roles.",
+        "accent": "emerald",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "pro-strategy",
+        "name": "Strategy Deck",
+        "category": "Professional",
+        "description": "Executive-ready summary and achievements.",
+        "accent": "blue",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "minimal-air",
+        "name": "Open Air",
+        "category": "Minimal",
+        "description": "Ultra-clean style with generous margins.",
+        "accent": "slate",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "minimal-line",
+        "name": "Linework",
+        "category": "Minimal",
+        "description": "Thin rules and crisp typography focus.",
+        "accent": "teal",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "creative-wave",
+        "name": "Waveform",
+        "category": "Creative",
+        "description": "Soft gradients for modern creatives.",
+        "accent": "indigo",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    },
+    {
+        "id": "modern-studio",
+        "name": "Studio Modern",
+        "category": "Modern",
+        "description": "Compact header with premium polish.",
+        "accent": "emerald",
+        "preview_url": "",
+        "download_url": "",
+        "updated_at": "2026-03-31T00:00:00Z"
+    }
+]

@@ -1,4 +1,7 @@
 import logging
+import os
+import re
+import time
 import uuid
 import io
 import json
@@ -7,10 +10,13 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 import pdfplumber
-from fastapi import FastAPI, APIRouter, UploadFile, File, Response
+import requests
+from fpdf import FPDF
+from fastapi import FastAPI, APIRouter, UploadFile, File, Response, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional, Dict, Any
 from dotenv import load_dotenv
 
 # Load .env from one level above backend/
@@ -21,12 +27,334 @@ load_dotenv(ENV_PATH)
 from text_cleaner import advanced_clean_text
 from groq_service import get_ats_score, get_job_suggestion
 from job_open import jobs as fetch_jobs
+from supabase_service import get_user_by_id
+from auth import verify_token
 
 # global cleaned text — gets updated on every /analyze call
 cleaned_text = ""
 CACHE_DIR = Path(__file__).resolve().parent / "cache"
 CACHE_DIR.mkdir(exist_ok=True)
 CLEANED_TEXT_PATH = CACHE_DIR / "cleaned_text.txt"
+
+# ============================================================
+# RESUME TEMPLATE DATA
+# ============================================================
+
+TEMPLATES_PATH = Path(__file__).resolve().parent / "templates.json"
+TEMPLATES_SOURCE_URL = os.getenv("TEMPLATES_SOURCE_URL", "").strip()
+TEMPLATES_API_TOKEN = os.getenv("TEMPLATES_API_TOKEN", "").strip()
+TEMPLATES_REFRESH_SECONDS = int(os.getenv("TEMPLATES_REFRESH_SECONDS", "300"))
+TEMPLATES_PROVIDER = os.getenv("TEMPLATES_PROVIDER", "auto").strip().lower()
+JSONRESUME_THEME_LIST_URL = os.getenv("JSONRESUME_THEME_LIST_URL", "https://docs.jsonresume.org/themes").strip()
+JSONRESUME_PREVIEW_BASE = os.getenv("JSONRESUME_PREVIEW_BASE", "https://registry.jsonresume.org").strip()
+JSONRESUME_PREVIEW_USERNAME = os.getenv("JSONRESUME_PREVIEW_USERNAME", "thomasdavis").strip()
+JSONRESUME_MAX_TEMPLATES = int(os.getenv("JSONRESUME_MAX_TEMPLATES", "24"))
+JSONRESUME_VALIDATE_TEMPLATES = os.getenv("JSONRESUME_VALIDATE_TEMPLATES", "true").strip().lower() == "true"
+TEMPLATES_CACHE: Dict[str, Any] = {
+    "data": [],
+    "source": "local",
+    "updated_at": None,
+    "fetched_at": 0.0
+}
+
+
+def _slugify(value: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9]+", "-", value.strip().lower()).strip("-")
+    return cleaned or "template"
+
+
+def _normalize_templates(raw: Any) -> List[Dict[str, Any]]:
+    if isinstance(raw, dict):
+        raw = raw.get("templates", [])
+    if not isinstance(raw, list):
+        return []
+
+    normalized: List[Dict[str, Any]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or item.get("title") or "Untitled Template")
+        template_id = item.get("id") or item.get("slug") or f"tmpl-{_slugify(name)}"
+        normalized.append({
+            "id": str(template_id),
+            "name": name,
+            "category": str(item.get("category") or "General"),
+            "description": str(item.get("description") or ""),
+            "accent": str(item.get("accent") or "emerald"),
+            "preview_url": item.get("preview_url") or item.get("previewUrl") or "",
+            "download_url": item.get("download_url") or item.get("downloadUrl") or "",
+            "preview_type": item.get("preview_type") or item.get("previewType") or "",
+            "updated_at": item.get("updated_at") or item.get("updatedAt")
+        })
+    return normalized
+
+
+def _load_local_templates() -> List[Dict[str, Any]]:
+    if not TEMPLATES_PATH.exists():
+        return []
+    try:
+        raw = json.loads(TEMPLATES_PATH.read_text(encoding="utf-8"))
+        return _normalize_templates(raw)
+    except Exception as exc:
+        logger.error(f"Failed to read local templates: {str(exc)}")
+        return []
+
+
+def _fetch_remote_templates() -> Optional[List[Dict[str, Any]]]:
+    if not TEMPLATES_SOURCE_URL:
+        return None
+
+    headers: Dict[str, str] = {}
+    if TEMPLATES_API_TOKEN:
+        headers["Authorization"] = f"Bearer {TEMPLATES_API_TOKEN}"
+
+    try:
+        response = requests.get(TEMPLATES_SOURCE_URL, headers=headers, timeout=10)
+        response.raise_for_status()
+        raw = response.json()
+        templates = _normalize_templates(raw)
+        return templates if templates else None
+    except Exception as exc:
+        logger.error(f"Failed to fetch remote templates: {str(exc)}")
+        return None
+
+
+def _extract_jsonresume_themes(html: str) -> List[str]:
+    marker_index = html.find("Complete Theme List")
+    if marker_index == -1:
+        return []
+
+    snippet = html[marker_index:marker_index + 4000]
+    themes = re.findall(r"`([^`]+)`", snippet)
+    valid = [theme for theme in themes if re.fullmatch(r"[a-z0-9-]+", theme)]
+    return valid
+
+
+def _categorize_jsonresume_theme(theme: str) -> str:
+    professional = {"standard", "standard-resume", "professional", "github", "github2", "stackoverflow", "techlead", "msresume"}
+    modern = {"spartan", "spartacus", "rocketspacer", "tan-responsive", "flat", "kards", "kendall", "orbit", "one", "onepage", "onepage-plus", "onepageresume"}
+    minimal = {"elegant", "paper", "paper-plus-plus", "papirus", "minyma", "simple-red", "relaxed", "even"}
+    creative = {"autumn", "pumpkin", "cora", "jacrys", "lucide", "mantra", "macchiato", "mocha-responsive", "rickosborne"}
+    classic = {"cv", "full", "ace", "actual", "el-santo"}
+
+    if theme in professional:
+        return "Professional"
+    if theme in minimal:
+        return "Minimal"
+    if theme in creative:
+        return "Creative"
+    if theme in classic:
+        return "Classic"
+    if theme in modern:
+        return "Modern"
+    return "Modern"
+
+
+def _is_jsonresume_theme_valid(theme: str) -> bool:
+    if not JSONRESUME_VALIDATE_TEMPLATES:
+        return True
+
+    url = f"{JSONRESUME_PREVIEW_BASE}/{JSONRESUME_PREVIEW_USERNAME}?theme={theme}"
+    try:
+        response = requests.get(url, timeout=6, stream=True)
+        content_type = response.headers.get("content-type", "").lower()
+        x_frame = response.headers.get("x-frame-options", "").lower()
+        csp = response.headers.get("content-security-policy", "").lower()
+        blocked_by_frame = bool(x_frame) and x_frame not in {"allowall", "allow-from *"}
+        blocked_by_csp = "frame-ancestors" in csp and ("'none'" in csp or "none" in csp)
+        is_valid = response.status_code == 200 and "text/html" in content_type and not blocked_by_frame and not blocked_by_csp
+        response.close()
+        return is_valid
+    except Exception:
+        return False
+
+
+def _fetch_jsonresume_templates() -> Optional[List[Dict[str, Any]]]:
+    try:
+        response = requests.get(JSONRESUME_THEME_LIST_URL, timeout=10)
+        response.raise_for_status()
+        theme_names = _extract_jsonresume_themes(response.text)
+        if not theme_names:
+            raise ValueError("No JSON Resume themes found in docs")
+    except Exception as exc:
+        logger.error(f"Failed to fetch JSON Resume themes: {str(exc)}")
+        theme_names = [
+            "standard", "professional", "elegant", "flat", "spartacus",
+            "spartan", "paper", "onepage", "onepage-plus", "kards",
+            "kendall", "orbit", "tan-responsive", "simple-red"
+        ]
+
+    accents = ["emerald", "blue", "teal", "cyan", "rose", "amber", "stone", "indigo"]
+    templates: List[Dict[str, Any]] = []
+    for index, theme in enumerate(theme_names):
+        if len(templates) >= JSONRESUME_MAX_TEMPLATES:
+            break
+        if not _is_jsonresume_theme_valid(theme):
+            continue
+        templates.append({
+            "id": f"jsonresume-{theme}",
+            "name": theme.replace("-", " ").title(),
+            "category": _categorize_jsonresume_theme(theme),
+            "description": f"JSON Resume theme: {theme}",
+            "accent": accents[len(templates) % len(accents)],
+            "preview_url": f"{JSONRESUME_PREVIEW_BASE}/{JSONRESUME_PREVIEW_USERNAME}?theme={theme}",
+            "download_url": f"{JSONRESUME_PREVIEW_BASE}/{JSONRESUME_PREVIEW_USERNAME}?theme={theme}",
+            "preview_type": "iframe",
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        })
+
+    return templates if templates else None
+
+
+def _set_templates_cache(templates: List[Dict[str, Any]], source: str) -> None:
+    TEMPLATES_CACHE["data"] = templates
+    TEMPLATES_CACHE["source"] = source
+    TEMPLATES_CACHE["updated_at"] = datetime.now(timezone.utc).isoformat()
+    TEMPLATES_CACHE["fetched_at"] = time.time()
+
+
+def _get_templates_cached() -> Dict[str, Any]:
+    now = time.time()
+    if TEMPLATES_CACHE["data"] and (now - TEMPLATES_CACHE["fetched_at"] < TEMPLATES_REFRESH_SECONDS):
+        return TEMPLATES_CACHE
+
+    templates: Optional[List[Dict[str, Any]]] = None
+    source = "local"
+
+    if TEMPLATES_PROVIDER == "jsonresume":
+        templates = _fetch_jsonresume_templates()
+        source = "jsonresume"
+    elif TEMPLATES_PROVIDER == "remote":
+        templates = _fetch_remote_templates()
+        source = "remote"
+    elif TEMPLATES_PROVIDER == "auto":
+        templates = _fetch_jsonresume_templates()
+        source = "jsonresume"
+        if not templates:
+            templates = _fetch_remote_templates()
+            source = "remote"
+
+    if not templates:
+        templates = _load_local_templates()
+        source = "local"
+
+    _set_templates_cache(templates, source)
+    return TEMPLATES_CACHE
+
+
+def _clean_text(value: Any, default: str = "") -> str:
+    if value is None:
+        return default
+    text = str(value).replace("\r", " ").strip()
+    if not text:
+        return default
+    try:
+        text.encode("latin-1")
+        return text
+    except UnicodeEncodeError:
+        return text.encode("latin-1", "replace").decode("latin-1")
+
+
+def _build_resume_pdf(resume: Dict[str, Any], template: Optional[Dict[str, Any]] = None) -> bytes:
+    name = _clean_text(resume.get("name"), "Resume")
+    title = _clean_text(resume.get("title"), "")
+    email = _clean_text(resume.get("email"), "")
+    phone = _clean_text(resume.get("phone"), "")
+    location = _clean_text(resume.get("location"), "")
+    linkedin = _clean_text(resume.get("linkedin"), "")
+    summary = _clean_text(resume.get("summary"), "")
+    exp_title = _clean_text(resume.get("experienceTitle"), "")
+    exp_company = _clean_text(resume.get("experienceCompany"), "")
+    exp_dates = _clean_text(resume.get("experienceDates"), "")
+    exp_location = _clean_text(resume.get("experienceLocation"), "")
+    exp_bullets = _clean_text(resume.get("experienceBullets"), "")
+    template_name = _clean_text((template or {}).get("name"), "")
+
+    pdf = FPDF(unit="pt", format="A4")
+    pdf.set_auto_page_break(auto=True, margin=48)
+    pdf.add_page()
+    # Some environments ship "pyfpdf" (FPDF1) which doesn't expose `epw`.
+    # Compute effective page width in points for portable layout.
+    effective_page_width = float(getattr(pdf, "w", 0)) - float(getattr(pdf, "l_margin", 0)) - float(getattr(pdf, "r_margin", 0))
+    pdf.set_font("Helvetica", "B", 22)
+    pdf.cell(0, 24, name, ln=1)
+
+    if title:
+        pdf.set_font("Helvetica", "", 12)
+        pdf.cell(0, 18, title, ln=1)
+
+    if template_name:
+        pdf.set_font("Helvetica", "I", 10)
+        pdf.set_text_color(100, 116, 139)
+        pdf.cell(0, 16, f"Template: {template_name}", ln=1)
+        pdf.set_text_color(0, 0, 0)
+
+    contact_parts = [part for part in [phone, email, linkedin, location] if part]
+    if contact_parts:
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(effective_page_width, 14, " | ".join(contact_parts))
+        pdf.ln(6)
+
+    if summary:
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 18, "Summary", ln=1)
+        pdf.set_font("Helvetica", "", 10)
+        pdf.multi_cell(effective_page_width, 14, summary)
+        pdf.ln(6)
+
+    if exp_title or exp_company:
+        pdf.set_font("Helvetica", "B", 12)
+        pdf.cell(0, 18, "Experience", ln=1)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 16, f"{exp_title} - {exp_company}".strip(" -"), ln=1)
+        pdf.set_font("Helvetica", "", 10)
+        if exp_dates or exp_location:
+            pdf.cell(0, 14, f"{exp_dates}  {exp_location}".strip(), ln=1)
+        # FPDF's default Latin fonts can raise encoding errors for non-Latin glyphs.
+        # Use ASCII-safe bullets and sanitize each line.
+        bullet_lines = [
+            _clean_text(line.strip(), "")
+            for line in exp_bullets.split("\n")
+            if line.strip()
+        ]
+        if bullet_lines:
+            for bullet in bullet_lines:
+                pdf.multi_cell(effective_page_width, 14, f"- {bullet}")
+        pdf.ln(4)
+
+    output = pdf.output(dest="S")
+    if isinstance(output, str):
+        return output.encode("latin-1")
+    return output
+
+
+def _extract_token(token: Optional[str], req: Optional[Request]) -> Optional[str]:
+    if token:
+        return token
+    if not req:
+        return None
+    auth_header = req.headers.get("authorization", "")
+    if auth_header.lower().startswith("bearer "):
+        return auth_header.split(" ", 1)[1].strip()
+    return None
+
+
+async def _require_download_auth(token: Optional[str], req: Optional[Request] = None) -> None:
+    token_value = _extract_token(token, req)
+    if not token_value:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    payload = verify_token(token_value)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    user_id = payload.get("sub")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    try:
+        user = await get_user_by_id(user_id)
+        if not user:
+            logger.warning("PDF download token valid but user not found in database.")
+    except Exception as exc:
+        logger.error(f"User lookup failed: {str(exc)}")
 
 # Optional auth
 try:
@@ -53,13 +381,53 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+    if origin.strip()
+]
+CORS_ORIGIN_REGEX = os.getenv(
+    "CORS_ORIGIN_REGEX",
+    r"^http://(localhost|127\.0\.0\.1)(:\d+)?$"
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=CORS_ORIGINS,
+    allow_origin_regex=CORS_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _is_origin_allowed(origin: str) -> bool:
+    if origin in CORS_ORIGINS:
+        return True
+    if not CORS_ORIGIN_REGEX:
+        return False
+    try:
+        return re.match(CORS_ORIGIN_REGEX, origin) is not None
+    except re.error:
+        return False
+
+
+@app.middleware("http")
+async def ensure_cors_headers(request: Request, call_next):
+    try:
+        response = await call_next(request)
+    except HTTPException as exc:
+        response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    except Exception as exc:
+        logger.exception(f"Unhandled server error: {str(exc)}")
+        response = JSONResponse(status_code=500, content={"detail": "Internal server error"})
+
+    origin = request.headers.get("origin")
+    if origin and _is_origin_allowed(origin):
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Vary"] = "Origin"
+    return response
 
 
 # ============================================================
@@ -77,6 +445,11 @@ class StatusCheckCreate(BaseModel):
     client_name: str
 
 
+class ResumePDFRequest(BaseModel):
+    resume: Dict[str, Any]
+    template: Optional[Dict[str, Any]] = None
+
+
 # ============================================================
 # ROOT ROUTES
 # ============================================================
@@ -89,7 +462,8 @@ async def main_root():
         "endpoints": {
             "health": "/api/",
             "analyze": "/api/analyze",
-            "job_suggestions": "/api/job_suggestions"
+            "job_suggestions": "/api/job_suggestions",
+            "templates": "/api/templates"
         }
     }
 
@@ -120,6 +494,104 @@ async def create_status_check(input: StatusCheckCreate):
 @api_router.get("/status", response_model=List[StatusCheck])
 async def get_status_checks():
     return []
+
+
+@api_router.get("/templates")
+async def get_templates(category: Optional[str] = None):
+    payload = _get_templates_cached()
+    templates = payload["data"]
+
+    if category:
+        normalized = category.strip().lower()
+        templates = [
+            template for template in templates
+            if template.get("category", "").strip().lower() == normalized
+        ]
+
+    categories = sorted({template.get("category") for template in payload["data"] if template.get("category")})
+    return {
+        "templates": templates,
+        "count": len(templates),
+        "source": payload["source"],
+        "last_updated": payload["updated_at"],
+        "categories": categories
+    }
+
+
+@api_router.get("/templates/{template_id}")
+async def get_template_by_id(template_id: str):
+    payload = _get_templates_cached()
+    template = next(
+        (item for item in payload["data"] if str(item.get("id")) == template_id),
+        None
+    )
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    return {
+        "template": template,
+        "source": payload["source"],
+        "last_updated": payload["updated_at"]
+    }
+
+
+@api_router.options("/resume/pdf")
+async def resume_pdf_options(request: Request):
+    origin = request.headers.get("origin") or ""
+    headers = {
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        "Access-Control-Allow-Credentials": "true",
+        "Vary": "Origin"
+    }
+    return Response(status_code=204, headers=headers)
+
+
+@api_router.post("/resume/pdf")
+async def generate_resume_pdf(request: ResumePDFRequest, req: Request, token: Optional[str] = None):
+    await _require_download_auth(token, req)
+    try:
+        pdf_bytes = _build_resume_pdf(request.resume or {}, request.template or {})
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception(f"Failed to generate resume PDF: {str(exc)}")
+        raise HTTPException(status_code=500, detail="Failed to generate PDF")
+    origin = req.headers.get("origin") or ""
+    headers = {
+        "Content-Disposition": "attachment; filename=resume.pdf",
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Vary": "Origin"
+    }
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers=headers
+    )
+
+
+# ------------------------------------------------------------
+# Backwards-compatible routes (older frontend builds)
+# ------------------------------------------------------------
+
+@app.options("/resume/pdf")
+async def resume_pdf_options_legacy(request: Request):
+    # Mirror the /api/resume/pdf preflight for legacy clients that call /resume/pdf
+    return await resume_pdf_options(request)
+
+
+@app.post("/resume/pdf")
+async def generate_resume_pdf_legacy(request: ResumePDFRequest, req: Request, token: Optional[str] = None):
+    # Delegate to the canonical implementation under /api
+    return await generate_resume_pdf(request, req, token)
+
+
+@app.get("/resume/pdf")
+async def resume_pdf_get_not_supported():
+    # Some older clients attempted a GET download flow; keep the error explicit.
+    raise HTTPException(status_code=405, detail="Use POST /api/resume/pdf with JSON body to generate a PDF.")
 
 
 # ============================================================

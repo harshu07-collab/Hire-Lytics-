@@ -1,8 +1,50 @@
-import React from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import '../styles/ResumeBuilder.css';
 
-const ResumeBuilder = () => {
+const defaultResume = {
+    name: 'Isabelle Todd',
+    title: 'Product Owner',
+    email: 'isabelle@gmail.com',
+    phone: '+1 (555) 111-1111',
+    location: 'New York City, NY',
+    linkedin: 'linkedin.com/in/isabelle-todd',
+    summary: 'I solve problems and help people overcome obstacles. Passionate about building products that scale and delight customers.',
+    experienceTitle: 'Product Owner',
+    experienceCompany: 'E-Lab Services',
+    experienceDates: '02/2020 - 04/2021',
+    experienceLocation: 'Hamburg, Germany',
+    experienceBullets: 'Drove the launch of a new tracking software that improved reporting speed by 45%.\nLed the team in making key product strategy decisions and prioritized customer feedback.'
+};
+
+const ResumeBuilder = ({ activeTemplate, initialResume, onResumeChange }) => {
+    const previewRef = useRef(null);
+    const [resume, setResume] = useState(() => initialResume || defaultResume);
+
+    const bullets = useMemo(
+        () => resume.experienceBullets.split('\n').map((line) => line.trim()).filter(Boolean),
+        [resume.experienceBullets]
+    );
+
+    const handleChange = (field) => (event) => {
+        setResume((current) => ({
+            ...current,
+            [field]: event.target.value
+        }));
+    };
+
+    useEffect(() => {
+        if (onResumeChange) {
+            onResumeChange(resume);
+        }
+    }, [resume, onResumeChange]);
+
+    const handleReview = () => {
+        if (previewRef.current) {
+            previewRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
     return (
         <section className="resume-builder-section">
             <div className="builder-container">
@@ -26,17 +68,141 @@ const ResumeBuilder = () => {
                         have the right keywords and skills to match with PDF formatting that an ATS can
                         easily read.
                     </p>
-                    <motion.button
-                        className="btn-builder"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        data-testid="continue-editing-btn"
-                    >
-                        Continue Editing
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M7 10H17M17 10L13 6M17 10L13 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                    </motion.button>
+                    <div className="builder-form">
+                        <div className="form-field">
+                            <label className="form-label" htmlFor="resume-name">Full name</label>
+                            <input
+                                id="resume-name"
+                                className="form-input"
+                                value={resume.name}
+                                onChange={handleChange('name')}
+                                placeholder="Your name"
+                            />
+                        </div>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-title">Role</label>
+                                <input
+                                    id="resume-title"
+                                    className="form-input"
+                                    value={resume.title}
+                                    onChange={handleChange('title')}
+                                    placeholder="Product Owner"
+                                />
+                            </div>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-location">Location</label>
+                                <input
+                                    id="resume-location"
+                                    className="form-input"
+                                    value={resume.location}
+                                    onChange={handleChange('location')}
+                                    placeholder="City, State"
+                                />
+                            </div>
+                        </div>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-email">Email</label>
+                                <input
+                                    id="resume-email"
+                                    className="form-input"
+                                    value={resume.email}
+                                    onChange={handleChange('email')}
+                                    placeholder="you@email.com"
+                                />
+                            </div>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-phone">Phone</label>
+                                <input
+                                    id="resume-phone"
+                                    className="form-input"
+                                    value={resume.phone}
+                                    onChange={handleChange('phone')}
+                                    placeholder="+1 (555) 123-4567"
+                                />
+                            </div>
+                        </div>
+                        <div className="form-field">
+                            <label className="form-label" htmlFor="resume-linkedin">LinkedIn</label>
+                            <input
+                                id="resume-linkedin"
+                                className="form-input"
+                                value={resume.linkedin}
+                                onChange={handleChange('linkedin')}
+                                placeholder="linkedin.com/in/yourname"
+                            />
+                        </div>
+                        <div className="form-field">
+                            <label className="form-label" htmlFor="resume-summary">Summary</label>
+                            <textarea
+                                id="resume-summary"
+                                className="form-textarea"
+                                rows="3"
+                                value={resume.summary}
+                                onChange={handleChange('summary')}
+                            />
+                        </div>
+                        <div className="form-divider">Experience</div>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-exp-title">Role</label>
+                                <input
+                                    id="resume-exp-title"
+                                    className="form-input"
+                                    value={resume.experienceTitle}
+                                    onChange={handleChange('experienceTitle')}
+                                />
+                            </div>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-exp-company">Company</label>
+                                <input
+                                    id="resume-exp-company"
+                                    className="form-input"
+                                    value={resume.experienceCompany}
+                                    onChange={handleChange('experienceCompany')}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-grid">
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-exp-dates">Dates</label>
+                                <input
+                                    id="resume-exp-dates"
+                                    className="form-input"
+                                    value={resume.experienceDates}
+                                    onChange={handleChange('experienceDates')}
+                                />
+                            </div>
+                            <div className="form-field">
+                                <label className="form-label" htmlFor="resume-exp-location">Location</label>
+                                <input
+                                    id="resume-exp-location"
+                                    className="form-input"
+                                    value={resume.experienceLocation}
+                                    onChange={handleChange('experienceLocation')}
+                                />
+                            </div>
+                        </div>
+                        <div className="form-field">
+                            <label className="form-label" htmlFor="resume-exp-bullets">Impact bullets (one per line)</label>
+                            <textarea
+                                id="resume-exp-bullets"
+                                className="form-textarea"
+                                rows="4"
+                                value={resume.experienceBullets}
+                                onChange={handleChange('experienceBullets')}
+                            />
+                        </div>
+                        <div className="form-actions">
+                            <button className="btn-builder" type="button" onClick={handleReview}>
+                                Review Resume
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                    <path d="M7 10H17M17 10L13 6M17 10L13 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </motion.div>
 
                 <motion.div
@@ -46,54 +212,53 @@ const ResumeBuilder = () => {
                     viewport={{ once: true, margin: "-100px" }}
                     transition={{ duration: 0.8, delay: 0.2 }}
                 >
-                    <div className="resume-preview-container">
+                    <div className="resume-preview-container" ref={previewRef}>
+                        {activeTemplate && (
+                            <div className="active-template-banner">
+                                <div>
+                                    <div className="banner-label">Editing Template</div>
+                                    <div className="banner-name">{activeTemplate.name}</div>
+                                    <div className="banner-meta">{activeTemplate.category}</div>
+                                </div>
+                                {(activeTemplate.previewUrl || activeTemplate.preview_url) && (
+                                    <a
+                                        className="banner-link"
+                                        href={activeTemplate.previewUrl || activeTemplate.preview_url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                    >
+                                        Open Preview
+                                    </a>
+                                )}
+                            </div>
+                        )}
                         <div className="resume-preview">
                             <div className="preview-header-section">
-                                <div className="preview-name">ISABELLE TODD</div>
-                                <div className="preview-tagline">I solve problems and help people overcome obstacles.</div>
+                                <div className="preview-name">{resume.name.toUpperCase()}</div>
+                                <div className="preview-tagline">{resume.summary}</div>
                                 <div className="preview-contact">
-                                    <span>+1 (555) 111 1111</span>
-                                    <span>isabelle@gmail.com</span>
-                                    <span>https://www.linkedin....</span>
-                                    <span>New York City, NY</span>
+                                    <span>{resume.phone}</span>
+                                    <span>{resume.email}</span>
+                                    <span>{resume.linkedin}</span>
+                                    <span>{resume.location}</span>
                                 </div>
+                            </div>
+                            <div className="preview-section">
+                                <div className="section-title">SUMMARY</div>
+                                <div className="summary-text">{resume.title}</div>
                             </div>
                             <div className="preview-section">
                                 <div className="section-title">EXPERIENCE</div>
                                 <div className="experience-item">
-                                    <div className="exp-title">Product Owner</div>
-                                    <div className="exp-company">E-Lab Services</div>
-                                    <div className="exp-date">02/2020 - 04/2021</div>
-                                    <div className="exp-location">Hamburg, Germany</div>
+                                    <div className="exp-title">{resume.experienceTitle}</div>
+                                    <div className="exp-company">{resume.experienceCompany}</div>
+                                    <div className="exp-date">{resume.experienceDates}</div>
+                                    <div className="exp-location">{resume.experienceLocation}</div>
                                     <ul className="exp-bullets">
-                                        <li>Drove the launch of a new tracking software at E-LAB that...</li>
-                                        <li>Led the team in making key product strategy decisions...</li>
+                                        {bullets.map((bullet) => (
+                                            <li key={bullet}>{bullet}</li>
+                                        ))}
                                     </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="template-selector">
-                            <div className="selector-label">Select a template</div>
-                            <div className="template-options">
-                                <div className="template-thumb active">
-                                    <div className="thumb-preview modern">
-                                        <div className="thumb-header"></div>
-                                        <div className="thumb-content">
-                                            <div className="thumb-line"></div>
-                                            <div className="thumb-line short"></div>
-                                        </div>
-                                    </div>
-                                    <span className="thumb-label">Modern</span>
-                                </div>
-                                <div className="template-thumb">
-                                    <div className="thumb-preview classic">
-                                        <div className="thumb-sidebar"></div>
-                                        <div className="thumb-main">
-                                            <div className="thumb-line"></div>
-                                            <div className="thumb-line short"></div>
-                                        </div>
-                                    </div>
-                                    <span className="thumb-label">Classic</span>
                                 </div>
                             </div>
                         </div>
