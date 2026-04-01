@@ -50,6 +50,15 @@ JSONRESUME_PREVIEW_BASE = os.getenv("JSONRESUME_PREVIEW_BASE", "https://registry
 JSONRESUME_PREVIEW_USERNAME = os.getenv("JSONRESUME_PREVIEW_USERNAME", "thomasdavis").strip()
 JSONRESUME_MAX_TEMPLATES = int(os.getenv("JSONRESUME_MAX_TEMPLATES", "24"))
 JSONRESUME_VALIDATE_TEMPLATES = os.getenv("JSONRESUME_VALIDATE_TEMPLATES", "true").strip().lower() == "true"
+# Upstream has removed many legacy themes (often returns JSON TEMPLATE_MISSING). Never surface these.
+JSONRESUME_DEPRECATED_THEMES = frozenset(
+    theme.strip().lower()
+    for theme in os.getenv(
+        "JSONRESUME_DEPRECATED_THEMES",
+        "standard,standard-resume,stackoverflow,github2",
+    ).split(",")
+    if theme.strip()
+)
 TEMPLATES_CACHE: Dict[str, Any] = {
     "data": [],
     "source": "local",
@@ -119,6 +128,19 @@ def _fetch_remote_templates() -> Optional[List[Dict[str, Any]]]:
         return None
 
 
+def _default_jsonresume_theme_names() -> List[str]:
+    """Bundled list used when docs.jsonresume.org theme list is unreachable.
+
+    Excludes themes known to be disabled upstream; each entry is still checked with
+    `_jsonresume_theme_preview_works` before being shown.
+    """
+    return [
+        "professional", "elegant", "flat", "spartacus", "spartan",
+        "paper", "kendall", "tan-responsive", "rocketspacer", "macchiato",
+        "github", "actual", "even", "relaxed",
+    ]
+
+
 def _extract_jsonresume_themes(html: str) -> List[str]:
     marker_index = html.find("Complete Theme List")
     if marker_index == -1:
@@ -150,21 +172,46 @@ def _categorize_jsonresume_theme(theme: str) -> str:
     return "Modern"
 
 
-def _is_jsonresume_theme_valid(theme: str) -> bool:
+def _jsonresume_theme_preview_works(theme: str) -> bool:
+    """True if registry serves a real HTML preview for this theme (not 400/JSON error)."""
     if not JSONRESUME_VALIDATE_TEMPLATES:
         return True
 
     url = f"{JSONRESUME_PREVIEW_BASE}/{JSONRESUME_PREVIEW_USERNAME}?theme={theme}"
     try:
-        response = requests.get(url, timeout=6, stream=True)
+        response = requests.get(url, timeout=10)
+        if response.status_code != 200:
+            return False
+
         content_type = response.headers.get("content-type", "").lower()
+        body = (response.text or "")[:16384]
+
+        if "TEMPLATE_MISSING" in body:
+            return False
+        try:
+            if body.strip().startswith("{"):
+                payload = json.loads(body)
+                err = payload.get("error") if isinstance(payload, dict) else None
+                if isinstance(err, dict) and err.get("code") == "TEMPLATE_MISSING":
+                    return False
+        except json.JSONDecodeError:
+            pass
+
+        # Error payloads are usually JSON even when status is 200 in edge cases
+        if "application/json" in content_type and '"error"' in body:
+            return False
+
+        if "text/html" not in content_type and "application/xhtml" not in content_type:
+            return False
+
         x_frame = response.headers.get("x-frame-options", "").lower()
         csp = response.headers.get("content-security-policy", "").lower()
         blocked_by_frame = bool(x_frame) and x_frame not in {"allowall", "allow-from *"}
         blocked_by_csp = "frame-ancestors" in csp and ("'none'" in csp or "none" in csp)
-        is_valid = response.status_code == 200 and "text/html" in content_type and not blocked_by_frame and not blocked_by_csp
-        response.close()
-        return is_valid
+        if blocked_by_frame or blocked_by_csp:
+            return False
+
+        return True
     except Exception:
         return False
 
@@ -177,19 +224,32 @@ def _fetch_jsonresume_templates() -> Optional[List[Dict[str, Any]]]:
         if not theme_names:
             raise ValueError("No JSON Resume themes found in docs")
     except Exception as exc:
-        logger.error(f"Failed to fetch JSON Resume themes: {str(exc)}")
-        theme_names = [
-            "standard", "professional", "elegant", "flat", "spartacus",
-            "spartan", "paper", "onepage", "onepage-plus", "kards",
-            "kendall", "orbit", "tan-responsive", "simple-red"
-        ]
+        resp = getattr(exc, "response", None)
+        status = getattr(resp, "status_code", None)
+        if status is not None and 500 <= status < 600:
+            logger.warning(
+                "JSON Resume theme list returned HTTP %s (upstream). Using bundled theme list.",
+                status,
+            )
+        else:
+            logger.warning(
+                "Could not load JSON Resume theme list from %s (%s). Using bundled theme list.",
+                JSONRESUME_THEME_LIST_URL,
+                exc,
+            )
+        theme_names = _default_jsonresume_theme_names()
+
+    theme_names = [
+        t for t in theme_names
+        if t.lower() not in JSONRESUME_DEPRECATED_THEMES
+    ]
 
     accents = ["emerald", "blue", "teal", "cyan", "rose", "amber", "stone", "indigo"]
     templates: List[Dict[str, Any]] = []
     for index, theme in enumerate(theme_names):
         if len(templates) >= JSONRESUME_MAX_TEMPLATES:
             break
-        if not _is_jsonresume_theme_valid(theme):
+        if not _jsonresume_theme_preview_works(theme):
             continue
         templates.append({
             "id": f"jsonresume-{theme}",
@@ -273,9 +333,11 @@ def _build_resume_pdf(resume: Dict[str, Any], template: Optional[Dict[str, Any]]
     pdf = FPDF(unit="pt", format="A4")
     pdf.set_auto_page_break(auto=True, margin=48)
     pdf.add_page()
-    # Some environments ship "pyfpdf" (FPDF1) which doesn't expose `epw`.
     # Compute effective page width in points for portable layout.
-    effective_page_width = float(getattr(pdf, "w", 0)) - float(getattr(pdf, "l_margin", 0)) - float(getattr(pdf, "r_margin", 0))
+    effective_page_width = getattr(pdf, "epw", None)
+    if effective_page_width is None:
+        effective_page_width = float(getattr(pdf, "w", 0)) - float(getattr(pdf, "l_margin", 0)) - float(getattr(pdf, "r_margin", 0))
+    
     pdf.set_font("Helvetica", "B", 22)
     pdf.cell(0, 24, name, ln=1)
 
@@ -322,10 +384,50 @@ def _build_resume_pdf(resume: Dict[str, Any], template: Optional[Dict[str, Any]]
                 pdf.multi_cell(effective_page_width, 14, f"- {bullet}")
         pdf.ln(4)
 
-    output = pdf.output(dest="S")
+    # fpdf2: Calling output() returns a bytearray; Starlette Response requires bytes.
+    # fpdf1: Calling output(dest='S') returns a string (often containing latin-1 binary).
+    try:
+        # Check if we are using fpdf2 by trying to call output() without arguments
+        output = pdf.output()
+    except TypeError:
+        # Fallback for old fpdf1 versions which require dest='S'
+        output = pdf.output(dest="S")
+
     if isinstance(output, str):
         return output.encode("latin-1")
-    return output
+    return bytes(output)
+
+
+def _safe_download_filename(value: str, fallback: str = "template") -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9._-]+", "-", (value or "").strip()).strip("-.")
+    if not cleaned:
+        cleaned = fallback
+    return cleaned.lower()
+
+
+def _build_template_sample_pdf(template: Dict[str, Any]) -> bytes:
+    sample_resume = {
+        "name": "Alex Candidate",
+        "title": "Senior Product Analyst",
+        "email": "alex.candidate@example.com",
+        "phone": "+1 (555) 123-9876",
+        "location": "New York, NY",
+        "linkedin": "linkedin.com/in/alexcandidate",
+        "summary": (
+            "Results-driven analyst with 6+ years of experience delivering measurable "
+            "business outcomes through data storytelling and process optimization."
+        ),
+        "experienceTitle": "Senior Product Analyst",
+        "experienceCompany": "Nova Systems",
+        "experienceDates": "2021 - Present",
+        "experienceLocation": "Remote",
+        "experienceBullets": (
+            "Improved conversion by 18% using A/B test insights\n"
+            "Built KPI dashboards used by leadership weekly\n"
+            "Reduced reporting cycle time from 3 days to 4 hours"
+        ),
+    }
+    return _build_resume_pdf(sample_resume, template)
 
 
 def _extract_token(token: Optional[str], req: Optional[Request]) -> Optional[str]:
@@ -533,6 +635,45 @@ async def get_template_by_id(template_id: str):
         "source": payload["source"],
         "last_updated": payload["updated_at"]
     }
+
+
+@api_router.get("/templates/{template_id}/download")
+async def download_template_pdf(template_id: str, req: Request):
+    payload = _get_templates_cached()
+    template = next(
+        (item for item in payload["data"] if str(item.get("id")) == template_id),
+        None
+    )
+    if not template:
+        raise HTTPException(status_code=404, detail="Template not found")
+
+    pdf_bytes: Optional[bytes] = None
+    download_url = (template.get("download_url") or template.get("downloadUrl") or "").strip()
+    if download_url:
+        try:
+            upstream = requests.get(download_url, timeout=15)
+            content_type = upstream.headers.get("content-type", "").lower()
+            if upstream.status_code == 200 and "application/pdf" in content_type:
+                pdf_bytes = upstream.content
+        except Exception as exc:
+            logger.warning(f"Template upstream download failed for {template_id}: {str(exc)}")
+
+    if not pdf_bytes:
+        try:
+            pdf_bytes = _build_template_sample_pdf(template)
+        except Exception as exc:
+            logger.exception(f"Failed to generate template sample PDF for {template_id}: {str(exc)}")
+            raise HTTPException(status_code=500, detail="Failed to generate template PDF")
+
+    origin = req.headers.get("origin") or ""
+    filename = _safe_download_filename(template.get("name", "template"), "template")
+    headers = {
+        "Content-Disposition": f'attachment; filename="{filename}.pdf"',
+        "Access-Control-Allow-Origin": origin,
+        "Access-Control-Allow-Credentials": "true",
+        "Vary": "Origin",
+    }
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
 
 @api_router.options("/resume/pdf")

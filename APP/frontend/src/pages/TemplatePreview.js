@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, ExternalLink, Pencil } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, Pencil } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import '../styles/TemplatePreview.css';
@@ -29,6 +29,8 @@ const TemplatePreview = ({ backendStatus }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [source, setSource] = useState('');
     const [lastUpdated, setLastUpdated] = useState('');
+    const [isDownloading, setIsDownloading] = useState(false);
+    const [downloadError, setDownloadError] = useState('');
 
     const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
 
@@ -84,6 +86,36 @@ const TemplatePreview = ({ backendStatus }) => {
         navigate(`/builder?template=${encodeURIComponent(template.id)}`);
     };
 
+    const handleTemplateDownload = async () => {
+        if (!template?.id) {
+            return;
+        }
+
+        setDownloadError('');
+        setIsDownloading(true);
+        try {
+            const response = await axios.get(
+                `${BACKEND_URL}/api/templates/${encodeURIComponent(template.id)}/download`,
+                { responseType: 'blob' }
+            );
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const filename = `${(template?.name || 'template').replace(/[^a-z0-9._-]+/gi, '-').toLowerCase()}.pdf`;
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Template download failed:', error);
+            setDownloadError('Failed to download template PDF. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     return (
         <div className="template-preview-page">
             <Navbar backendStatus={backendStatus} />
@@ -108,6 +140,15 @@ const TemplatePreview = ({ backendStatus }) => {
                             <Pencil size={18} />
                             Edit Template
                         </button>
+                        <button
+                            className="action-button ghost"
+                            type="button"
+                            onClick={handleTemplateDownload}
+                            disabled={!template || isDownloading}
+                        >
+                            <Download size={18} />
+                            {isDownloading ? 'Preparing PDF...' : 'Download PDF'}
+                        </button>
                         {(template?.previewUrl || template?.preview_url) && (
                             <a
                                 className="action-button ghost"
@@ -125,6 +166,9 @@ const TemplatePreview = ({ backendStatus }) => {
                 <motion.div className="template-preview-body" variants={cardVariants}>
                     {isLoading && <div className="template-preview-loading">Loading preview...</div>}
                     {!isLoading && errorMessage && <div className="template-preview-error">{errorMessage}</div>}
+                    {!isLoading && !errorMessage && downloadError && (
+                        <div className="template-preview-error">{downloadError}</div>
+                    )}
                     {!isLoading && !errorMessage && template && (
                         <div className="template-preview-panel">
                             {(template.previewType || template.preview_type) === 'iframe' ? (
