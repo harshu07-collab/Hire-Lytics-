@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import '../styles/ResumeBuilder.css';
 
 const defaultResume = {
@@ -38,6 +39,39 @@ const ResumeBuilder = ({ activeTemplate, initialResume, onResumeChange }) => {
             onResumeChange(resume);
         }
     }, [resume, onResumeChange]);
+
+    const [isDownloading, setIsDownloading] = useState(false);
+    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+
+    const handleDownload = async () => {
+        setIsDownloading(true);
+        try {
+            const response = await axios.post(
+                `${BACKEND_URL}/api/resume/pdf`,
+                {
+                    resume: resume,
+                    template: activeTemplate
+                },
+                { responseType: 'blob' }
+            );
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const filename = `${(resume.name || 'resume').replace(/[^a-z0-9._-]+/gi, '-').toLowerCase()}.pdf`;
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading resume:', error);
+            alert("Failed to download resume. Please try again.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     const handleReview = () => {
         if (previewRef.current) {
@@ -194,11 +228,28 @@ const ResumeBuilder = ({ activeTemplate, initialResume, onResumeChange }) => {
                                 onChange={handleChange('experienceBullets')}
                             />
                         </div>
-                        <div className="form-actions">
+                        <div className="form-actions" style={{ gap: '12px' }}>
                             <button className="btn-builder" type="button" onClick={handleReview}>
-                                Review Resume
+                                Review
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path d="M7 10H17M17 10L13 6M17 10L13 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                            </button>
+                            <button
+                                className="btn-builder"
+                                type="button"
+                                onClick={handleDownload}
+                                disabled={isDownloading}
+                                style={{
+                                    background: 'linear-gradient(135deg, #0ea5e9, #0284c7)',
+                                    boxShadow: '0 4px 12px rgba(14, 165, 233, 0.3)'
+                                }}
+                            >
+                                {isDownloading ? 'Generating...' : 'Download PDF'}
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4" />
+                                    <polyline points="7 10 12 15 17 10" />
+                                    <line x1="12" y1="15" x2="12" y2="3" />
                                 </svg>
                             </button>
                         </div>
@@ -232,7 +283,7 @@ const ResumeBuilder = ({ activeTemplate, initialResume, onResumeChange }) => {
                                 )}
                             </div>
                         )}
-                        <div className="resume-preview">
+                        <div className={`resume-preview category-${(activeTemplate?.category || 'general').toLowerCase()}`}>
                             <div className="preview-header-section">
                                 <div className="preview-name">{resume.name.toUpperCase()}</div>
                                 <div className="preview-tagline">{resume.summary}</div>

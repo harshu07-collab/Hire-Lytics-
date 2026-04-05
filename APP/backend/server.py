@@ -329,51 +329,86 @@ def _build_resume_pdf(resume: Dict[str, Any], template: Optional[Dict[str, Any]]
     exp_location = _clean_text(resume.get("experienceLocation"), "")
     exp_bullets = _clean_text(resume.get("experienceBullets"), "")
     template_name = _clean_text((template or {}).get("name"), "")
+    category = _clean_text((template or {}).get("category"), "General").lower()
 
     pdf = FPDF(unit="pt", format="A4")
     pdf.set_auto_page_break(auto=True, margin=48)
     pdf.add_page()
+    
     # Compute effective page width in points for portable layout.
     effective_page_width = getattr(pdf, "epw", None)
     if effective_page_width is None:
         effective_page_width = float(getattr(pdf, "w", 0)) - float(getattr(pdf, "l_margin", 0)) - float(getattr(pdf, "r_margin", 0))
     
-    pdf.set_font("Helvetica", "B", 22)
-    pdf.cell(0, 24, name, ln=1)
+    # STYLE SETTINGS BASED ON CATEGORY
+    font_main = "Helvetica"
+    font_header = "Helvetica"
+    header_align = "L"
+    accent_color = (0, 0, 0)
+    
+    if "traditional" in category:
+        font_main = "Times"
+        font_header = "Times"
+        header_align = "C"
+    elif "modern" in category:
+        accent_color = (16, 185, 129) # Emerald
+    elif "creative" in category:
+        accent_color = (14, 165, 233) # Sky Blue
+    elif "professional" in category:
+        accent_color = (30, 64, 175) # Blue
+    elif "minimal" in category:
+        pdf.set_margins(60, 60, 60)
+    
+    # HEADER
+    pdf.set_font(font_header, "B", 24)
+    pdf.set_text_color(*accent_color)
+    pdf.cell(0, 30, name, ln=1, align=header_align)
+    pdf.set_text_color(0, 0, 0)
 
     if title:
-        pdf.set_font("Helvetica", "", 12)
-        pdf.cell(0, 18, title, ln=1)
-
-    if template_name:
-        pdf.set_font("Helvetica", "I", 10)
-        pdf.set_text_color(100, 116, 139)
-        pdf.cell(0, 16, f"Template: {template_name}", ln=1)
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_font(font_main, "", 14)
+        pdf.cell(0, 20, title, ln=1, align=header_align)
 
     contact_parts = [part for part in [phone, email, linkedin, location] if part]
     if contact_parts:
-        pdf.set_font("Helvetica", "", 10)
-        pdf.multi_cell(effective_page_width, 14, " | ".join(contact_parts))
-        pdf.ln(6)
+        pdf.set_font(font_main, "", 10)
+        pdf.set_text_color(100, 116, 139)
+        pdf.cell(0, 16, " | ".join(contact_parts), ln=1, align=header_align)
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(10)
+
+    if template_name:
+        pdf.set_font(font_main, "I", 8)
+        pdf.set_text_color(150, 150, 150)
+        pdf.cell(0, 10, f"Style: {template_name} ({category.title()})", ln=1, align="R")
+        pdf.set_text_color(0, 0, 0)
+        pdf.ln(5)
 
     if summary:
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.cell(0, 18, "Summary", ln=1)
-        pdf.set_font("Helvetica", "", 10)
-        pdf.multi_cell(effective_page_width, 14, summary)
-        pdf.ln(6)
+        pdf.set_font(font_header, "B", 12)
+        pdf.set_text_color(*accent_color)
+        pdf.cell(0, 18, "SUMMARY", ln=1)
+        pdf.set_text_color(0, 0, 0)
+        
+        pdf.set_font(font_main, "", 11)
+        pdf.multi_cell(effective_page_width, 15, summary)
+        pdf.ln(10)
 
     if exp_title or exp_company:
-        pdf.set_font("Helvetica", "B", 12)
-        pdf.cell(0, 18, "Experience", ln=1)
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.cell(0, 16, f"{exp_title} - {exp_company}".strip(" -"), ln=1)
-        pdf.set_font("Helvetica", "", 10)
+        pdf.set_font(font_header, "B", 12)
+        pdf.set_text_color(*accent_color)
+        pdf.cell(0, 18, "EXPERIENCE", ln=1)
+        pdf.set_text_color(0, 0, 0)
+        
+        pdf.set_font(font_main, "B", 11)
+        pdf.cell(0, 16, f"{exp_title} @ {exp_company}".strip(" @"), ln=1)
+        
+        pdf.set_font(font_main, "I", 10)
         if exp_dates or exp_location:
-            pdf.cell(0, 14, f"{exp_dates}  {exp_location}".strip(), ln=1)
-        # FPDF's default Latin fonts can raise encoding errors for non-Latin glyphs.
-        # Use ASCII-safe bullets and sanitize each line.
+            pdf.cell(0, 14, f"{exp_dates} | {exp_location}".strip(" |"), ln=1)
+        
+        pdf.ln(4)
+        pdf.set_font(font_main, "", 11)
         bullet_lines = [
             _clean_text(line.strip(), "")
             for line in exp_bullets.split("\n")
@@ -381,8 +416,8 @@ def _build_resume_pdf(resume: Dict[str, Any], template: Optional[Dict[str, Any]]
         ]
         if bullet_lines:
             for bullet in bullet_lines:
-                pdf.multi_cell(effective_page_width, 14, f"- {bullet}")
-        pdf.ln(4)
+                pdf.multi_cell(effective_page_width, 15, f"- {bullet}")
+        pdf.ln(10)
 
     # fpdf2: Calling output() returns a bytearray; Starlette Response requires bytes.
     # fpdf1: Calling output(dest='S') returns a string (often containing latin-1 binary).

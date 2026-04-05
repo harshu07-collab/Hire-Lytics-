@@ -229,6 +229,111 @@
     font-size: 11px;
     line-height: 1.6;
     min-height: 400px;
+    transition: all 0.4s ease;
+}
+
+/* CATEGORY SPECIFIC PREVIEWS */
+
+/* Traditional: Serif fonts, centered header */
+.resume-preview.category-traditional {
+    font-family: 'Times New Roman', Times, serif;
+    text-align: left;
+}
+.resume-preview.category-traditional .preview-header-section {
+    text-align: center;
+    border-bottom: 2px solid #1f2937;
+}
+.resume-preview.category-traditional .preview-name {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;
+}
+.resume-preview.category-traditional .section-title {
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 4px;
+}
+
+/* Modern: Sans-serif, bold accents, clean lines */
+.resume-preview.category-modern {
+    border-left: 8px solid #10b981;
+}
+.resume-preview.category-modern .preview-name {
+    color: #10b981;
+}
+.resume-preview.category-modern .section-title {
+    color: #059669;
+    background: #f0fdf4;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+/* Creative: Vibrant, unique layout elements */
+.resume-preview.category-creative {
+    background: linear-gradient(to bottom right, #ffffff, #f0f9ff);
+    border: 1px solid #bae6fd;
+}
+.resume-preview.category-creative .preview-header-section {
+    background: #0ea5e9;
+    margin: -32px -32px 24px -32px;
+    padding: 32px;
+    color: white;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+.resume-preview.category-creative .preview-name,
+.resume-preview.category-creative .preview-tagline,
+.resume-preview.category-creative .preview-contact {
+    color: white;
+}
+.resume-preview.category-creative .section-title {
+    color: #0ea5e9;
+}
+
+/* Professional: Structured, blue accents */
+.resume-preview.category-professional {
+    border-top: 6px solid #1e40af;
+}
+.resume-preview.category-professional .preview-name {
+    color: #1e3a8a;
+}
+.resume-preview.category-professional .section-title {
+    color: #1e3a8a;
+    border-left: 4px solid #1e3a8a;
+    padding-left: 10px;
+}
+
+/* Minimal: Ultra clean, lots of whitespace */
+.resume-preview.category-minimal {
+    padding: 48px;
+    font-family: 'Inter', sans-serif;
+    color: #374151;
+}
+.resume-preview.category-minimal .preview-header-section {
+    border-bottom: none;
+    margin-bottom: 32px;
+}
+.resume-preview.category-minimal .preview-name {
+    font-weight: 300;
+    letter-spacing: 2px;
+}
+.resume-preview.category-minimal .section-title {
+    font-weight: 500;
+    color: #9ca3af;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+}
+
+/* Simple: Clean, no-fuss layout */
+.resume-preview.category-simple {
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+}
+.resume-preview.category-simple .preview-header-section {
+    border-bottom: 1px solid #cbd5e1;
+}
+.resume-preview.category-simple .section-title {
+    color: #64748b;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .dark .resume-preview {
