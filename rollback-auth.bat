@@ -18,7 +18,7 @@ echo   - frontend/src/pages/Login.js
 echo   - frontend/src/pages/Signup.js
 echo   - frontend/src/contexts/AuthContext.js
 echo   - frontend/src/App.js
-echo   - backend/server.py
+echo   - backend/app.py
 echo   - backend/requirements.txt
 echo   - frontend/package.json
 echo.
@@ -80,7 +80,7 @@ echo   git restore frontend/src/pages/Login.js
 echo   git restore frontend/src/pages/Signup.js
 echo   git restore frontend/src/contexts/AuthContext.js
 echo   git restore frontend/src/App.js
-echo   git restore backend/server.py
+echo   git restore backend/app.py
 echo   git restore backend/requirements.txt
 echo   git restore frontend/package.json
 echo.

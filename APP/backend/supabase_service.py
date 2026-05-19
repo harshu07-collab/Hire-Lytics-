@@ -3,12 +3,16 @@ Supabase Integration Module
 Handles user database operations using Supabase
 """
 import os
+import socket
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from one level above backend/
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_PATH)
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +29,10 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
 class SupabaseService:
     def __init__(self):
-        self.available = SUPABASE_AVAILABLE and SUPABASE_URL and SUPABASE_SERVICE_KEY
+        # Improved check for valid configuration
+        is_placeholder = any(x in (SUPABASE_URL or "").lower() for x in ["replace_me", "your-project", "rlfappahvvqiwwaxmcec"])
+        
+        self.available = SUPABASE_AVAILABLE and SUPABASE_URL and SUPABASE_SERVICE_KEY and not is_placeholder
         self.memory_mode = False
         self._memory_users: Dict[str, Dict[str, Any]] = {}
         if self.available:
@@ -43,9 +50,20 @@ class SupabaseService:
         text = str(error)
         return "PGRST205" in text or "Could not find the table 'public.users'" in text
 
-    def _enable_memory_mode(self) -> None:
+    def _is_connection_error(self, error: Exception) -> bool:
+        """Check if the error is related to connection/DNS issues"""
+        text = str(error).lower()
+        return (
+            "[errno 11001]" in text or 
+            "getaddrinfo failed" in text or 
+            "connection error" in text or 
+            "timed out" in text or 
+            "failed to connect" in text
+        )
+
+    def _enable_memory_mode(self, reason: str = "Supabase unavailable") -> None:
         if not self.memory_mode:
-            logger.warning("Supabase users table unavailable, switching to in-memory auth store")
+            logger.warning(f"{reason}, switching to in-memory auth store")
             self.memory_mode = True
 
     def _memory_create_user(
@@ -108,8 +126,13 @@ class SupabaseService:
             return response.data[0] if response.data else None
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 return self._memory_create_user(email, name, auth_provider, google_id, hashed_password)
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                return self._memory_create_user(email, name, auth_provider, google_id, hashed_password)
+                
             logger.error(f"Error creating user {email}: {str(e)}")
             return None
 
@@ -124,8 +147,13 @@ class SupabaseService:
             return response.data[0] if response.data else None
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 return self._memory_find_user("email", email)
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                return self._memory_find_user("email", email)
+                
             logger.error(f"Error getting user {email}: {str(e)}")
             return None
 
@@ -139,8 +167,13 @@ class SupabaseService:
             return response.data[0] if response.data else None
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 return self._memory_users.get(user_id)
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                return self._memory_users.get(user_id)
+                
             logger.error(f"Error getting user {user_id}: {str(e)}")
             return None
 
@@ -154,8 +187,13 @@ class SupabaseService:
             return response.data[0] if response.data else None
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 return self._memory_find_user("google_id", google_id)
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                return self._memory_find_user("google_id", google_id)
+                
             logger.error(f"Error getting user by Google ID: {str(e)}")
             return None
 
@@ -176,11 +214,19 @@ class SupabaseService:
             return True
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 user = self._memory_users.get(user_id)
                 if user:
                     user["is_verified"] = True
                 return True
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                user = self._memory_users.get(user_id)
+                if user:
+                    user["is_verified"] = True
+                return True
+                
             logger.error(f"Error verifying user {user_id}: {str(e)}")
             return False
 
@@ -201,11 +247,19 @@ class SupabaseService:
             return True
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 user = self._memory_users.get(user_id)
                 if user:
                     user["last_login"] = datetime.now(timezone.utc).isoformat()
                 return True
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                user = self._memory_users.get(user_id)
+                if user:
+                    user["last_login"] = datetime.now(timezone.utc).isoformat()
+                return True
+                
             logger.error(f"Error updating last login for {user_id}: {str(e)}")
             return False
 
@@ -224,12 +278,21 @@ class SupabaseService:
             return response.data[0] if response.data else None
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 user = self._memory_users.get(user_id)
                 if not user:
                     return None
                 user.update(data)
                 return user
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                user = self._memory_users.get(user_id)
+                if not user:
+                    return None
+                user.update(data)
+                return user
+                
             logger.error(f"Error updating user {user_id}: {str(e)}")
             return None
 
@@ -243,8 +306,13 @@ class SupabaseService:
             return len(response.data) > 0
         except Exception as e:
             if self._is_missing_users_table_error(e):
-                self._enable_memory_mode()
+                self._enable_memory_mode("Supabase users table unavailable")
                 return self._memory_find_user("email", email) is not None
+            
+            if self._is_connection_error(e):
+                self._enable_memory_mode("Supabase connection failed")
+                return self._memory_find_user("email", email) is not None
+                
             logger.error(f"Error checking email {email}: {str(e)}")
             return False
 

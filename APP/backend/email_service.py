@@ -7,9 +7,12 @@ from typing import Optional, List
 from email.mime.text import MIMEText
 import smtplib
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from one level above backend/
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_PATH)
 
 logger = logging.getLogger(__name__)
 

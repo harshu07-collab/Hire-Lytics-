@@ -193,6 +193,8 @@ async def signup_verify_otp(request: OTPVerifyRequest):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e)
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in signup_verify_otp: {str(e)}")
         raise HTTPException(
@@ -302,6 +304,8 @@ async def login_verify_otp(request: OTPVerifyRequest):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e)
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in login_verify_otp: {str(e)}")
         raise HTTPException(
@@ -424,6 +428,8 @@ async def google_auth(request: GoogleAuthRequest):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e)
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in google_auth: {str(e)}")
         raise HTTPException(
@@ -459,6 +465,8 @@ async def refresh_token(request: RefreshTokenRequest):
             refresh_token=request.refresh_token,  # Reuse same refresh token
             expires_in=900
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in refresh_token: {str(e)}")
         raise HTTPException(
@@ -506,6 +514,8 @@ async def get_current_user_profile(token: str = None):
             created_at=user.get("created_at"),
             last_login=user.get("last_login")
         )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in get_current_user_profile: {str(e)}")
         raise HTTPException(
@@ -534,6 +544,8 @@ async def logout(token: str = None):
             "success": True,
             "message": "Logged out successfully"
         }
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error in logout: {str(e)}")
         raise HTTPException(

@@ -70,7 +70,7 @@ Hire-Lytics/
 │   │   │   └── contexts/   # State management
 │   │   └── public/         # Static assets
 │   └── backend/            # FastAPI + Python
-│       ├── server.py       # Main API server
+│       ├── app.py          # Main API server
 │       └── requirements.txt # Python dependencies
 ├── package.json            # Root configuration and scripts
 └── README.md              # Project documentation
@@ -110,7 +110,7 @@ npm run install:all
 **Option B: Manual Start**
 ```bash
 # Terminal 1: Backend
-cd APP/backend && python server.py
+cd APP/backend && python app.py
 # Server available at: http://localhost:8000
 
 # Terminal 2: Frontend
@@ -192,7 +192,7 @@ cd ../frontend && npm install
 cp APP/.env.example APP/.env
 
 # Start backend (Terminal 1)
-cd APP/backend && python server.py
+cd APP/backend && python app.py
 
 # Start frontend (Terminal 2)
 cd APP/frontend && npm start

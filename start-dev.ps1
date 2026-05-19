@@ -30,7 +30,7 @@ Write-Host "Starting Backend Server..." -ForegroundColor Green
 Write-Host "Backend will run on: http://localhost:8000" -ForegroundColor Cyan
 
 # Start backend in new window
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\Hire-Lytics\APP\backend; .\venv\Scripts\activate; python server.py"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd D:\Hire-Lytics\APP\backend; .\venv\Scripts\activate; python app.py"
 
 # Wait a bit for backend to start
 Start-Sleep -Seconds 3

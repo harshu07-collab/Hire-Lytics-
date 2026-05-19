@@ -20,7 +20,7 @@ This document guides you through setting up the new real authentication system w
 - **NEW: `backend/auth_routes.py`** - API endpoints for auth
 - **NEW: `backend/email_service.py`** - Email OTP sending
 - **NEW: `backend/supabase_service.py`** - Database integration
-- **MODIFIED: `backend/server.py`** - Integrated auth routes
+- **MODIFIED: `backend/app.py`** - Integrated auth routes
 - **MODIFIED: `backend/requirements.txt`** - Added auth dependencies
 
 #### Frontend (React)
@@ -163,7 +163,7 @@ SMTP_PASSWORD=your-app-password  # Use App Password, not regular password
 #### Terminal 1 - Backend
 ```bash
 cd APP/backend
-python server.py
+python app.py
 # Server runs on http://localhost:8000
 ```
 
@@ -346,7 +346,7 @@ cd APP
 git restore frontend/src/pages/Login.js frontend/src/pages/Signup.js
 git restore frontend/src/contexts/AuthContext.js
 git restore frontend/src/App.js
-git restore backend/server.py
+git restore backend/app.py
 git restore backend/requirements.txt
 git restore frontend/package.json
 ```
@@ -372,7 +372,7 @@ mkdir auth_backup
 # Copy modified files
 cp frontend/src/pages/Login.js auth_backup/
 cp frontend/src/pages/Signup.js auth_backup/
-cp backend/server.py auth_backup/
+cp backend/app.py auth_backup/
 
 # You can restore from auth_backup/ later
 ```

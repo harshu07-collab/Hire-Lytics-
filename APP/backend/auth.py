@@ -11,9 +11,12 @@ from pydantic import BaseModel, EmailStr
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from functools import lru_cache
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Load .env from one level above backend/
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_PATH)
 
 # ============================================================
 # CONFIGURATION

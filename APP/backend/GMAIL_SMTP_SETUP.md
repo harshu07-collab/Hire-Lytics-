@@ -40,7 +40,7 @@ Testing SMTP email service...
 
 ## Step 5: Test Signup Flow
 
-1. Start backend: `python server.py`
+1. Start backend: `python app.py`
 2. Start frontend: `cd ../frontend && npm start`
 3. Go to `http://localhost:3000/signup`
 4. Enter email and click "Send OTP"

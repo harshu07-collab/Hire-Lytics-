@@ -16,7 +16,7 @@ Write-Host "  - frontend/src/pages/Login.js"
 Write-Host "  - frontend/src/pages/Signup.js"
 Write-Host "  - frontend/src/contexts/AuthContext.js"
 Write-Host "  - frontend/src/App.js"
-Write-Host "  - backend/server.py"
+Write-Host "  - backend/app.py"
 Write-Host "  - backend/requirements.txt"
 Write-Host "  - frontend/package.json"
 Write-Host ""
@@ -85,7 +85,7 @@ Write-Host "   git restore frontend/src/pages/Login.js" -ForegroundColor Cyan
 Write-Host "   git restore frontend/src/pages/Signup.js" -ForegroundColor Cyan
 Write-Host "   git restore frontend/src/contexts/AuthContext.js" -ForegroundColor Cyan
 Write-Host "   git restore frontend/src/App.js" -ForegroundColor Cyan
-Write-Host "   git restore backend/server.py" -ForegroundColor Cyan
+Write-Host "   git restore backend/app.py" -ForegroundColor Cyan
 Write-Host "   git restore backend/requirements.txt" -ForegroundColor Cyan
 Write-Host "   git restore frontend/package.json" -ForegroundColor Cyan
 Write-Host ""

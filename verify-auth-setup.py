@@ -30,7 +30,7 @@ def check_python_version():
 def check_backend_files():
     """Check if backend files exist"""
     files = [
-        APP_DIR / "backend/server.py",
+        APP_DIR / "backend/app.py",
         APP_DIR / "backend/auth.py",
         APP_DIR / "backend/auth_routes.py",
         APP_DIR / "backend/email_service.py",
@@ -215,7 +215,7 @@ def main():
         print("ALL CHECKS PASSED - Ready to start!")
         print("\nNext Steps:")
         print("   1. Read: QUICK_AUTH_START.md")
-        print("   2. Start backend: cd APP/backend && python server.py")
+        print("   2. Start backend: cd APP/backend && python app.py")
         print("   3. Start frontend: cd APP/frontend && npm start")
         print("   4. Test at: http://localhost:3000/signup")
     else:
